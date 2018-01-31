@@ -36,6 +36,8 @@ namespace InstaBot
             InitializeComponent();
 
             AutoBot = (Bot)instaGrid.DataContext;
+            AutoBot.LoginAsync();
+
             //TestApiAsync();
         }
 
@@ -70,7 +72,6 @@ namespace InstaBot
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             
-            AutoBot.LoginAsync();
 
         }
 

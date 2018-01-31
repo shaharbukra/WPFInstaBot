@@ -9,7 +9,7 @@ namespace InstaBot.Objects
     public static  class InstaInfo
     {
         internal static string SigKeyVersion = "4";
-
+        public static int FeedImages => 20;
         public static string ApiUrl => "https://i.instagram.com/api/v1/";
         public static string IgSigKey => "b4946d296abf005163e72346a6d33dd083cadde638e6ad9c5eb92e381b35784a";
         public static string UserAgent => "Instagram 12.0.0.7.91 Android (18/4.3; 320dpi; 720x1280; Xiaomi; HM 1SW; armani; qcom; en_US)";

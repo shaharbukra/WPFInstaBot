@@ -3,6 +3,7 @@ using InstaBot.Objects.InstagramData;
 using InstaBot.Objects.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,11 +18,12 @@ namespace InstaBot.Objects
       
         #region Data members
         private UserDetail _loggedInUser;
+        private ObservableCollection<FeedItem> _userFeedData = new ObservableCollection<FeedItem>();
         private bool _isBusy;
 
         public bool IsBusy
         {
-            get { return _isBusy; }
+            get => _isBusy;
             set {
                 _isBusy = value;
                 RaisePropertyChanged();
@@ -29,12 +31,21 @@ namespace InstaBot.Objects
         }
         public UserDetail LoggedInUser
         {
-            get { return _loggedInUser; }
+            get => _loggedInUser;
             private set
             {
                 _loggedInUser = value;
                 RaisePropertyChanged();
                 RaisePropertyChanged("LoggedInUserImage");
+            }
+        }
+        public ObservableCollection<FeedItem> UserFeedData
+        {
+            get => _userFeedData;
+            private set
+            {
+                _userFeedData = value;
+                RaisePropertyChanged();
             }
         }
         public BitmapImage LoggedInUserImage
@@ -51,7 +62,7 @@ namespace InstaBot.Objects
 
         public string Username
         {
-            get { return InstaInfo.Login; }
+            get => InstaInfo.Login;
             set {
                 InstaInfo.Login = value;
                 RaisePropertyChanged();
@@ -59,7 +70,7 @@ namespace InstaBot.Objects
         }
         public string Password
         {
-            get { return InstaInfo.Password; }
+            get => InstaInfo.Password;
             set
             {
                 InstaInfo.Password = value;
@@ -80,7 +91,7 @@ namespace InstaBot.Objects
             else
             {
                 InstaInfo.Login = "shaharbukra";
-                InstaInfo.Password = "Password";
+                InstaInfo.Password = "";
             }
         }
 
@@ -88,7 +99,7 @@ namespace InstaBot.Objects
         {
             if (!string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(password))
             {
-                IsBusy = true;
+                
                 InstaInfo.Login = userName;
                 InstaInfo.Password = password;
                 LoginAsync();
@@ -101,13 +112,37 @@ namespace InstaBot.Objects
 
         public async void LoginAsync()
         {
+            IsBusy = true;
             var loginUserDetail = await Actions.Login(InstaInfo.Login, InstaInfo.Password);
             if (loginUserDetail != null)
             {
                 LoggedInUser = loginUserDetail;
+
+                await GetSelfFeedAsync();
             }
             IsBusy = false;
         }
 
+        private async Task GetSelfFeedAsync()
+        {
+            IsBusy = true;
+
+            var feed = await Actions.GetSelfUserFeed();
+
+            //var feed = await Actions.GetSelfFeed();
+            if (feed != null)
+            {
+                feed.items.ForEach(i=> UserFeedData.Add(i));
+                
+                while (UserFeedData.Count < InstaInfo.FeedImages)
+                {
+                    feed = await Actions.GetSelfUserFeed(feed.next_max_id);
+                    feed.items.ForEach(i => UserFeedData.Add(i));
+
+                }
+            }
+            IsBusy = false;
+
+        }
     }
 }

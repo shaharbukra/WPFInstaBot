@@ -83,6 +83,7 @@
     <Compile Include="Helpers\Hash.cs" />
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
+    <Compile Include="Helpers\VirtualizingWrapPanel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -90,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\Bot.cs" />
+    <Compile Include="Objects\InstagramData\FeedData.cs" />
     <Compile Include="Objects\InstagramData\InboxData.cs" />
     <Compile Include="Objects\InstaInfo.cs" />
     <Compile Include="Objects\InstagramData\UserDetail.cs" />

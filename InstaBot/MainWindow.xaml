@@ -7,6 +7,7 @@
     xmlns:local="clr-namespace:InstaBot"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:virtualCollection="clr-namespace:VirtualCollection.VirtualCollection"
     xmlns:vm="clr-namespace:InstaBot.Objects"
     Title="MainWindow"
     Width="525"
@@ -31,71 +32,50 @@
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel
+        <!--<StackPanel
             Grid.RowSpan="2"
             Grid.Column="1"
             Grid.ColumnSpan="2"
-            Background="Red"
-            Orientation="Horizontal">
-            <StackPanel Orientation="Vertical">
-                <materialDesign:Card Width="200">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="140" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+            Background="{DynamicResource MaterialDesignPaper}"
+            Orientation="Vertical">-->
+        <!--<WrapPanel Margin="0,0,8,8">-->
+        <ListBox
+            x:Name="KindsListBox"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="0,8,0,0"
+            ItemsSource="{Binding UserFeedData}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <virtualCollection:VirtualizingWrapPanel ItemHeight="80" ItemWidth="80" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="materialDesign:Chip">
+                    <DockPanel
+                        Width="200"
+                        Height="200"
+                        Background="Transparent"
+                        ToolTip="{Binding caption.text}">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            DockPanel.Dock="Bottom"
+                            Text="{Binding user.username}"
+                            TextTrimming="CharacterEllipsis" />
                         <Image
-                            Width="196"
-                            Height="140"
-                            Source="{Binding LoggedInUserImage}"
+                            Width="160"
+                            Height="160"
+                            Source="{Binding image_versions2.candidate.url}"
                             Stretch="Fill" />
-                        <Button
-                            Grid.Row="0"
-                            Margin="0,0,16,-20"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
-                            Click="OpenInstagramProfile"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}">
-                            <materialDesign:PackIcon Kind="Instagram" />
-                        </Button>
-                        <StackPanel Grid.Row="1" Margin="8,24,8,0">
-                            <TextBlock
-                                Margin="2"
-                                FontWeight="Bold"
-                                Text="{Binding LoggedInUser.user.username}"
-                                TextAlignment="Center" />
-                            <TextBlock
-                                Margin="2"
-                                VerticalAlignment="Center"
-                                Text="{Binding LoggedInUser.user.biography}"
-                                TextAlignment="Center"
-                                TextWrapping="Wrap" />
-                            <TextBlock Margin="2" Text="{Binding LoggedInUser.user.following_count, StringFormat=Has following : \{0:0\}}" />
-                            <TextBlock Margin="2" Text="{Binding LoggedInUser.user.follower_count, StringFormat=Has follower : \{0:0\}}" />
-                            <TextBlock Margin="2" Text="{Binding LoggedInUser.user.media_count, StringFormat=With  \{0:0\} Pictures}" />
-                        </StackPanel>
-                        <!--<StackPanel HorizontalAlignment="Right" Grid.Row="2" Orientation="Horizontal" Margin="8">
-                            <Button Style="{StaticResource MaterialDesignToolButton}" Width="30" Padding="2 0 2 0"
-                            materialDesign:RippleAssist.IsCentered="True">
-                                <materialDesign:PackIcon Kind="ShareVariant" />
-                            </Button>
-                            <Button Style="{StaticResource MaterialDesignToolButton}" Width="30" Padding="2 0 2 0"
-                            materialDesign:RippleAssist.IsCentered="True">
-                                <materialDesign:PackIcon Kind="Heart" />
-                            </Button>
-                            <materialDesign:PopupBox Style="{StaticResource MaterialDesignToolPopupBox}" Padding="2 0 2 0">
-                                <StackPanel>
-                                    <Button Content="More"/>
-                                    <Button Content="Options"/>
-                                </StackPanel>
-                            </materialDesign:PopupBox>
-                        </StackPanel>-->
-                    </Grid>
-                </materialDesign:Card>
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
-            </StackPanel>
-        </StackPanel>
+        <!--</StackPanel>-->
+
 
         <!--  DataContext="{Binding LocationDisplay}"  -->
         <StatusBar
@@ -104,7 +84,18 @@
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Stretch">
             <StatusBarItem>
-                <TextBlock Text="Status" />
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="Not busy" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                    <Setter Property="Text" Value="Requesting Data..." />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StatusBarItem>
             <Separator Opacity=".5" />
             <!--<StatusBarItem>
@@ -113,7 +104,7 @@
         </StatusBar>
 
         <StackPanel Grid.Column="0" Orientation="Horizontal">
-            <Expander Height="200" ExpandDirection="Right">
+            <Expander Height="Auto" ExpandDirection="Right">
                 <Expander.Header>
                     <TextBlock RenderTransformOrigin=".5,.5" Text="Login">
                         <TextBlock.LayoutTransform>
@@ -159,10 +150,80 @@
                         ToolTip="Login">
                         Login
                     </Button>
+
+                    <StackPanel Orientation="Vertical">
+                        <materialDesign:Flipper Style="{StaticResource MaterialDesignCardFlipper}">
+                            <materialDesign:Flipper.FrontContent>
+                                <Button
+                                    Width="192"
+                                    Margin="8"
+                                    Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                    Content="{Binding LoggedInUser.user.username}"
+                                    Style="{StaticResource MaterialDesignFlatButton}" />
+                            </materialDesign:Flipper.FrontContent>
+                            <materialDesign:Flipper.BackContent>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <materialDesign:ColorZone Padding="6" Mode="Accent">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button
+                                                HorizontalAlignment="Left"
+                                                Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                                Style="{StaticResource MaterialDesignToolForegroundButton}">
+                                                <materialDesign:PackIcon HorizontalAlignment="Right" Kind="ArrowLeft" />
+                                            </Button>
+                                            <TextBlock Margin="8,0,0,0" VerticalAlignment="Center">User Detail</TextBlock>
+                                        </StackPanel>
+                                    </materialDesign:ColorZone>
+                                    <materialDesign:Card Grid.Row="1" Width="200">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="140" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Image
+                                                Width="196"
+                                                Height="140"
+                                                Source="{Binding LoggedInUserImage}"
+                                                Stretch="Fill" />
+                                            <Button
+                                                Grid.Row="0"
+                                                Margin="0,0,16,-20"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Bottom"
+                                                Click="OpenInstagramProfile"
+                                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}">
+                                                <materialDesign:PackIcon Kind="Instagram" />
+                                            </Button>
+                                            <StackPanel Grid.Row="1" Margin="8,24,8,0">
+                                                <TextBlock
+                                                    Margin="2"
+                                                    FontWeight="Bold"
+                                                    Text="{Binding LoggedInUser.user.username}"
+                                                    TextAlignment="Center" />
+                                                <TextBlock
+                                                    Margin="2"
+                                                    VerticalAlignment="Center"
+                                                    Text="{Binding LoggedInUser.user.biography}"
+                                                    TextAlignment="Center"
+                                                    TextWrapping="Wrap" />
+                                                <TextBlock Margin="2" Text="{Binding LoggedInUser.user.following_count, StringFormat=Has following : \{0:0\}}" />
+                                                <TextBlock Margin="2" Text="{Binding LoggedInUser.user.follower_count, StringFormat=Has follower : \{0:0\}}" />
+                                                <TextBlock Margin="2" Text="{Binding LoggedInUser.user.media_count, StringFormat=With  \{0:0\} Pictures}" />
+                                            </StackPanel>
+
+                                        </Grid>
+                                    </materialDesign:Card>
+                                </Grid>
+                            </materialDesign:Flipper.BackContent>
+                        </materialDesign:Flipper>
+                    </StackPanel>
                 </StackPanel>
             </Expander>
         </StackPanel>
-
-
     </Grid>
 </Window>
