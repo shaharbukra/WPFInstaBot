@@ -93,9 +93,7 @@
     <Compile Include="Objects\InstagramData\InboxData.cs" />
     <Compile Include="Objects\InstaInfo.cs" />
     <Compile Include="Objects\InstagramData\UserDetail.cs" />
-    <Compile Include="Objects\Models\IAsyncCommand.cs" />
     <Compile Include="Objects\Models\ModelBase.cs" />
-    <Compile Include="Objects\Models\RelayCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

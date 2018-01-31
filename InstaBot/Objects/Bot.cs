@@ -14,10 +14,7 @@ namespace InstaBot.Objects
 {
     public class Bot : ModelBase
     {
-        #region Commands
-
-        #endregion Commands
-
+      
         #region Data members
         private UserDetail _loggedInUser;
         private bool _isBusy;
@@ -42,14 +39,16 @@ namespace InstaBot.Objects
         }
         public BitmapImage LoggedInUserImage
         {
-            get {
-                if(LoggedInUser!=null)
+            get
+            {
+                if (LoggedInUser != null)
                     return new BitmapImage(new Uri(_loggedInUser.user.hd_profile_pic_url_info.url));
                 else
                     return new BitmapImage(new Uri("https://media.wired.com/photos/59268651cefba457b079a47e/2:1/w_2500,c_limit/Instagram-v051916-f.jpg"));
             }
            
         }
+
         public string Username
         {
             get { return InstaInfo.Login; }
@@ -80,7 +79,8 @@ namespace InstaBot.Objects
             }
             else
             {
-             
+                InstaInfo.Login = "shaharbukra";
+                InstaInfo.Password = "Password";
             }
         }
 
@@ -99,7 +99,6 @@ namespace InstaBot.Objects
         }
         #endregion Ctor
 
-  
         public async void LoginAsync()
         {
             var loginUserDetail = await Actions.Login(InstaInfo.Login, InstaInfo.Password);
