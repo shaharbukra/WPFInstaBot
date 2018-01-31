@@ -3,3 +3,6 @@
 ################################################################################
 
 /InstaBot/bin/Debug/data
+/InstaBot/bin/Debug
+/InstaBot/obj/Debug
+/packages
