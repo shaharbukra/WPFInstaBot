@@ -53,18 +53,39 @@
                 {
                     InstaInfo.LoginStatus = true;
                     InstaInfo.RankToken = InstaInfo.UserNameId + "_" + InstaInfo.Uuid;
-                    if (await GetZeroRatingTokenResult())
-                    {
-                        if (await GetBootstrapUsers())
-                        {
-                            var a = "ASd";
-                        }
+                    //if (await GetZeroRatingTokenResult())
+                    //{
+                    //    if (await GetBootstrapUsers())
+                    //    {
+                    //        var a = "ASd";
+                    //    }
+                    //    if (await GetQPFetch())
+                    //    {
 
-                        if (await SyncUsersFeaturesAsync())
-                        {
+                    //    }
+                        //if (await SyncUsersFeaturesAsync())
+                        //{
+                        //    if (await Direct.GetRankedRecipients("reshare",true))
+                        //    {
+                        //        if (await Direct.GetRankedRecipients("raven", true))
+                        //        {
+                        //            if (await Direct.GetInbox())
+                        //            {
+                        //                if (await GetProfileNotice())
+                        //                {
+                        //                    if (await People.GetRecentActivityInbox())
+                        //                    {
+                        //                        if (await GetQPFetch())
+                        //                        {
 
-                        }
-                    }
+                        //                        }
+                        //                    }
+                        //                }
+                        //            }
+                        //        }
+                        //    }
+                        //}
+                    //}
 
                     if (await SyncUsersFeaturesAsync())
                     {
@@ -131,6 +152,26 @@
             return false;
         }
 
+        public static async Task<bool> GetQPFetch()
+        {
+            var postData = new Dictionary<string, string>
+            {
+                {"_uuid",InstaInfo.Uuid},
+                {"_uid",InstaInfo.UserNameId},
+                {"_csrftoken",InstaInfo.CsrfToken},
+                {"vc_policy","default"},
+                {"surface_param",InstaInfo.SurfaceParam.ToString()},
+                {"version","1"},
+                {"query", "viewer(){eligible_promotions.surface_nux_id(<surface>).external_gating_permitted_qps(<external_gating_permitted_qps>){edges{priority,time_range{start,end},node{id,promotion_id,max_impressions,triggers,template{name,parameters{name,string_value}},creatives{title{text},content{text},footer{text},social_context{text},primary_action{title{text},url,limit,dismiss_promotion},secondary_action{title{text},url,limit,dismiss_promotion},dismiss_action{title{text},url,limit,dismiss_promotion},image{uri}}}}}}"}
+            };
+            var data = JsonConvert.SerializeObject(postData).ToString();
+            if (await Request.SendRequestAsync("qp/fetch/", GenerateData.Signature(data), false))
+            {
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// The Follow
         /// </summary>
@@ -156,8 +197,9 @@
 
         public static async Task<bool> GetUsernameInfoAsync(string userNameId)
         {
-            if (await Request.SendRequestAsync("feed/timeline/", null, false))
-            {
+            //if (await Request.SendRequestAsync("feed/timeline/", null, false))
+            if (await Request.SendRequestAsync($"users/{userNameId}/info/", null, false))
+                {
                 var arg = JsonConvert.DeserializeObject<Objects.InstagramData.UserDetail>(InstaInfo.LastResponse);
                 if (arg != null)
                 {
@@ -168,7 +210,20 @@
             }
             return false;
         }
-       
+
+        public static async Task<bool> GetProfileNotice()
+        {
+            if (await Request.SendRequestAsync("users/profile_notice/", null, false))
+            {
+                return true;
+
+            }
+            return false;
+        }
+
+
+
+
 
         /// <summary>
         /// The SyncFeaturesAsync

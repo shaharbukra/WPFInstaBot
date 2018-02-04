@@ -10,8 +10,6 @@
     xmlns:virtualCollection="clr-namespace:VirtualCollection.VirtualCollection"
     xmlns:vm="clr-namespace:InstaBot.Objects"
     Title="MainWindow"
-    Width="525"
-    Height="350"
     Background="{DynamicResource MaterialDesignPaper}"
     FontFamily="{DynamicResource MaterialDesignFont}"
     mc:Ignorable="d">
@@ -49,7 +47,7 @@
             ItemsSource="{Binding UserFeedData}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <virtualCollection:VirtualizingWrapPanel ItemHeight="80" ItemWidth="80" />
+                    <virtualCollection:VirtualizingWrapPanel ItemHeight="200" ItemWidth="200" />
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
             <ListBox.ItemTemplate>
@@ -67,6 +65,7 @@
                         <Image
                             Width="160"
                             Height="160"
+                            MouseLeftButtonUp="UIElement_OnMouseLeftButtonUp"
                             Source="{Binding image_versions2.candidate.url}"
                             Stretch="Fill" />
                     </DockPanel>
@@ -103,7 +102,7 @@
             </StatusBarItem>-->
         </StatusBar>
 
-        <StackPanel Grid.Column="0" Orientation="Horizontal">
+        <StackPanel Grid.Column="0" Orientation="Vertical">
             <Expander Height="Auto" ExpandDirection="Right">
                 <Expander.Header>
                     <TextBlock RenderTransformOrigin=".5,.5" Text="Login">
@@ -158,7 +157,7 @@
                                     Width="192"
                                     Margin="8"
                                     Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                                    Content="{Binding LoggedInUser.user.username}"
+                                    Content="{Binding LoggedInUser.user.username, TargetNullValue=Need To Login, FallbackValue=Please Login}"
                                     Style="{StaticResource MaterialDesignFlatButton}" />
                             </materialDesign:Flipper.FrontContent>
                             <materialDesign:Flipper.BackContent>
@@ -222,6 +221,170 @@
                             </materialDesign:Flipper.BackContent>
                         </materialDesign:Flipper>
                     </StackPanel>
+                </StackPanel>
+            </Expander>
+            <Expander Height="Auto" ExpandDirection="Right">
+                <Expander.Header>
+                    <TextBlock RenderTransformOrigin=".5,.5" Text="Settings">
+                        <TextBlock.LayoutTransform>
+                            <RotateTransform Angle="90" />
+                        </TextBlock.LayoutTransform>
+                    </TextBlock>
+                </Expander.Header>
+                <StackPanel
+                    Margin="8,24,16,24"
+                    Orientation="Vertical"
+                    TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center">Likes between</TextBlock>
+                        <ComboBox
+                            MinWidth="30"
+                            Margin="16,0,16,12"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            materialDesign:HintAssist.Hint="(More than)"
+                            ItemsSource="{Binding LongListTill1000}"
+                            SelectedIndex="0"
+                            SelectedItem="{Binding SelectedMinLikes}"
+                            Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+
+                        <TextBlock VerticalAlignment="Center">And</TextBlock>
+                        <ComboBox
+                            MinWidth="30"
+                            Margin="16,0,16,12"
+                            materialDesign:HintAssist.Hint="(Less than)"
+                            ItemsSource="{Binding LongListTill1000}"
+                            SelectedIndex="100"
+                            SelectedItem="{Binding SelectedMaxLikes}"
+                            Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+
+                    </StackPanel>
+                    <Grid Width="200" HorizontalAlignment="Left">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            TextAlignment="Left">
+                            Like per hour
+                        </TextBlock>
+                        <ComboBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            MinWidth="30"
+                            Margin="16,0,16,12"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            materialDesign:HintAssist.Hint="(Max 100)"
+                            ItemsSource="{Binding LongListTill200}"
+                            SelectedIndex="100"
+                            SelectedItem="{Binding SelectedLikePerHour}"
+                            Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment="Center">
+                            Follow per hour
+                        </TextBlock>
+                        <ComboBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            MinWidth="30"
+                            Margin="16,0,16,12"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            materialDesign:HintAssist.Hint="(Max 100)"
+                            ItemsSource="{Binding LongListTill200}"
+                            SelectedIndex="100"
+                            SelectedItem="{Binding SelectedFollowPerHour}"
+                            Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            VerticalAlignment="Center">
+                            Unfollow per hour
+                        </TextBlock>
+                        <ComboBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            MinWidth="30"
+                            Margin="16,0,16,12"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            materialDesign:HintAssist.Hint="(Max 100)"
+                            ItemsSource="{Binding LongListTill200}"
+                            SelectedIndex="100"
+                            SelectedItem="{Binding SelectedFollowPerHour}"
+                            Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            VerticalAlignment="Center">
+                            Comment per hour
+                        </TextBlock>
+                        <ComboBox
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            MinWidth="30"
+                            Margin="16,0,16,12"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            materialDesign:HintAssist.Hint="(Max 100)"
+                            ItemsSource="{Binding LongListTill200}"
+                            SelectedIndex="100"
+                            SelectedItem="{Binding SelectedFollowPerHour}"
+                            Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <Button Content="{Binding LoggedInUser.user.username, FallbackValue=Please Login}" />
+                    </Grid>
+
+
+
+
                 </StackPanel>
             </Expander>
         </StackPanel>

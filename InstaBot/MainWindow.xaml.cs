@@ -36,7 +36,7 @@ namespace InstaBot
             InitializeComponent();
 
             AutoBot = (Bot)instaGrid.DataContext;
-            AutoBot.LoginAsync();
+            //AutoBot.LoginAsync();
 
             //TestApiAsync();
         }
@@ -71,8 +71,8 @@ namespace InstaBot
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            
 
+            AutoBot.LoginAsync();
         }
 
 
@@ -85,6 +85,13 @@ namespace InstaBot
 
 
             }
+        }
+
+        private void UIElement_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var code = ((FeedItem) (sender as Image)?.DataContext)?.code;
+            System.Diagnostics.Process.Start($"https://www.instagram.com/p/{code}");
+
         }
     }
 }

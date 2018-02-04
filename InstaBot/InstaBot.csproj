@@ -68,8 +68,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="Api\Actions.cs" />
+    <Compile Include="Api\Direct.cs" />
     <Compile Include="Api\Inbox.cs" />
     <Compile Include="Api\Media.cs" />
+    <Compile Include="Api\People.cs" />
     <Compile Include="Api\Request.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>

@@ -39,6 +39,22 @@ namespace InstaBot.Objects
                 RaisePropertyChanged("LoggedInUserImage");
             }
         }
+
+        public List<int> LongListTill1000 => Enumerable.Range(0, 1000).ToList();
+        public List<int> LongListTill200 => Enumerable.Range(0, 200).ToList();
+
+        public int SelectedMinLikes { get; set; } = 0;
+
+        public int SelectedMaxLikes { get; set; } = 300;
+
+        public int SelectedLikePerHour { get; set; } = 100;
+
+        public int SelectedFollowPerHour { get; set; } = 100;
+
+        public int SelectedUnfollowPerHour { get; set; } = 100;
+
+        public int SelectedCommentPerHour { get; set; } = 100;
+
         public ObservableCollection<FeedItem> UserFeedData
         {
             get => _userFeedData;
@@ -90,8 +106,8 @@ namespace InstaBot.Objects
             }
             else
             {
-                InstaInfo.Login = "shaharbukra";
-                InstaInfo.Password = "";
+                InstaInfo.Login = "username";
+                InstaInfo.Password = "password";
             }
         }
 
@@ -127,7 +143,7 @@ namespace InstaBot.Objects
         {
             IsBusy = true;
 
-            var feed = await Actions.GetSelfUserFeed();
+            var feed = await Actions.GetSelfTimelineFeed();
 
             //var feed = await Actions.GetSelfFeed();
             if (feed != null)
@@ -136,7 +152,7 @@ namespace InstaBot.Objects
                 
                 while (UserFeedData.Count < InstaInfo.FeedImages)
                 {
-                    feed = await Actions.GetSelfUserFeed(feed.next_max_id);
+                    feed = await Actions.GetSelfTimelineFeed(feed.next_max_id);
                     feed.items.ForEach(i => UserFeedData.Add(i));
 
                 }
