@@ -159,10 +159,73 @@ namespace InstaBot.Objects.InstagramData
         public string tracking_token { get; set; }
     }
 
-    public class FeedItem
+    public class RankedItem
     {
         public int taken_at { get; set; }
         public object pk { get; set; }
+        public string id { get; set; }
+        public object device_timestamp { get; set; }
+        public int media_type { get; set; }
+        public string code { get; set; }
+        public string client_cache_key { get; set; }
+        public int filter_type { get; set; }
+        public ImageVersions2 image_versions2 { get; set; }
+        public int original_width { get; set; }
+        public int original_height { get; set; }
+        public Location location { get; set; }
+        public double lat { get; set; }
+        public double lng { get; set; }
+        public User user { get; set; }
+        public Caption caption { get; set; }
+        public bool caption_is_edited { get; set; }
+        public int like_count { get; set; }
+        public bool has_liked { get; set; }
+        public bool comment_likes_enabled { get; set; }
+        public bool comment_threading_enabled { get; set; }
+        public bool has_more_comments { get; set; }
+        public object next_max_id { get; set; }
+        public int max_num_visible_preview_comments { get; set; }
+        public List<object> preview_comments { get; set; }
+        public int comment_count { get; set; }
+        public bool photo_of_you { get; set; }
+        public Usertags usertags { get; set; }
+        public bool can_viewer_save { get; set; }
+        public string organic_tracking_token { get; set; }
+        public List<CarouselMedia> carousel_media { get; set; }
+        public List<VideoVersion> video_versions { get; set; }
+        public bool? has_audio { get; set; }
+        public double? video_duration { get; set; }
+        public double? view_count { get; set; }
+        public int? is_dash_eligible { get; set; }
+        public string video_dash_manifest { get; set; }
+        public int? number_of_qualities { get; set; }
+    }
+
+    public class VideoVersion
+    {
+        public int type { get; set; }
+        public int width { get; set; }
+        public int height { get; set; }
+        public string url { get; set; }
+        public string id { get; set; }
+    }
+
+    public class CarouselMedia
+    {
+        public string id { get; set; }
+        public int media_type { get; set; }
+        public ImageVersions2 image_versions2 { get; set; }
+        public int original_width { get; set; }
+        public int original_height { get; set; }
+        public object pk { get; set; }
+        public string carousel_parent_id { get; set; }
+        public object usertags { get; set; }
+    }
+
+    public class FeedItem
+    {
+        public int taken_at { get; set; }
+        public string pk { get; set; }
         public string id { get; set; }
         public object device_timestamp { get; set; }
         public int media_type { get; set; }
@@ -200,15 +263,40 @@ namespace InstaBot.Objects.InstagramData
         public double? lng { get; set; }
         public SuggestedInvites suggested_invites { get; set; }
     }
-
+    public class Owner
+    {
+        public string type { get; set; }
+        public string pk { get; set; }
+        public string name { get; set; }
+        public string profile_pic_url { get; set; }
+        public string profile_pic_username { get; set; }
+    }
+    public class Story
+    {
+        public string id { get; set; }
+        public int latest_reel_media { get; set; }
+        public int expiring_at { get; set; }
+        public object seen { get; set; }
+        public bool can_reply { get; set; }
+        public bool can_reshare { get; set; }
+        public string reel_type { get; set; }
+        public Owner owner { get; set; }
+        public List<Item> items { get; set; }
+        public int prefetch_count { get; set; }
+        public long unique_integer_reel_id { get; set; }
+        public bool muted { get; set; }
+    }
     public class FeedData
     {
+        public List<RankedItem> ranked_items { get; set; }
         public List<FeedItem> items { get; set; }
         public int num_results { get; set; }
         public bool more_available { get; set; }
         public bool auto_load_more_enabled { get; set; }
         public bool is_direct_v2_enabled { get; set; }
         public string next_max_id { get; set; }
+        public Story story { get; set; }
+
         public string status { get; set; }
     }
     

@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using InstaBot.Helpers;
 
 namespace InstaBot
 {
@@ -36,6 +37,7 @@ namespace InstaBot
             InitializeComponent();
 
             AutoBot = (Bot)instaGrid.DataContext;
+            HandleLoginActionAsync("Login");
             //AutoBot.LoginAsync();
 
             //TestApiAsync();
@@ -69,10 +71,31 @@ namespace InstaBot
         {
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Login_Click(object sender, RoutedEventArgs e)
         {
+            var action = (sender as Button).Content.ToString();
+            await HandleLoginActionAsync(action);
 
-            AutoBot.LoginAsync();
+
+        }
+
+        private async Task HandleLoginActionAsync(string action)
+        {
+            switch (action)
+            {
+                case "Login":
+                    if (await AutoBot.LoginAsync())
+                    {
+                        BotButton.IsEnabled = true;
+                    }
+                    break;
+                case "Logout":
+                    Log.WriteLog("Logout success!");
+                    BotButton.IsEnabled = false;
+                    break;
+                default:
+                    break;
+            }
         }
 
 
@@ -81,17 +104,43 @@ namespace InstaBot
             if (AutoBot.LoggedInUser != null)
             {
                 System.Diagnostics.Process.Start("https://www.instagram.com/" + AutoBot.LoggedInUser.user.username);
-
-
-
             }
         }
 
         private void UIElement_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            var code = ((FeedItem) (sender as Image)?.DataContext)?.code;
+            var code = ((FeedItem)(sender as StackPanel)?.DataContext)?.code;
             System.Diagnostics.Process.Start($"https://www.instagram.com/p/{code}");
 
+        }
+
+        private async void Bot_Click(object sender, RoutedEventArgs e)
+        {
+            var action = (sender as Button).Content;
+            switch (action.ToString())
+            {
+                case "Start Bot":
+                    action = "Stop Bot";
+                    BotStopButton.Visibility = Visibility.Visible;
+                    BotButton.Visibility = Visibility.Collapsed;
+                    await AutoBot.StartBot();
+                    break;
+                case "Stop Bot":
+                    action = "Start Bot";
+                    BotStopButton.Visibility = Visibility.Collapsed;
+                    BotButton.Visibility = Visibility.Visible;
+                    AutoBot.IsBotActive = false;
+
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        private void BotButton_Click(object sender, MouseButtonEventArgs e)
+        {
+            
         }
     }
 }

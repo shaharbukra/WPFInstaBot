@@ -37,10 +37,11 @@
             Background="{DynamicResource MaterialDesignPaper}"
             Orientation="Vertical">-->
         <!--<WrapPanel Margin="0,0,8,8">-->
+
         <ListBox
             x:Name="KindsListBox"
             Grid.Row="0"
-            Grid.RowSpan="3"
+            Grid.RowSpan="2"
             Grid.Column="1"
             Grid.ColumnSpan="2"
             Margin="0,8,0,0"
@@ -52,23 +53,18 @@
             </ListBox.ItemsPanel>
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="materialDesign:Chip">
-                    <DockPanel
-                        Width="200"
-                        Height="200"
-                        Background="Transparent"
-                        ToolTip="{Binding caption.text}">
+                    <StackPanel MouseLeftButtonUp="UIElement_OnMouseLeftButtonUp" ToolTip="{Binding caption.text}">
                         <TextBlock
                             HorizontalAlignment="Center"
                             DockPanel.Dock="Bottom"
                             Text="{Binding user.username}"
                             TextTrimming="CharacterEllipsis" />
                         <Image
-                            Width="160"
-                            Height="160"
-                            MouseLeftButtonUp="UIElement_OnMouseLeftButtonUp"
+                            Width="{Binding image_versions2.candidate.Width}"
+                            Height="{Binding image_versions2.candidate.Height}"
                             Source="{Binding image_versions2.candidate.url}"
                             Stretch="Fill" />
-                    </DockPanel>
+                    </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
@@ -87,9 +83,11 @@
                     <TextBlock.Style>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Text" Value="Not busy" />
+                            <Setter Property="Background" Value="Gray" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsBusy}" Value="True">
                                     <Setter Property="Text" Value="Requesting Data..." />
+                                    <Setter Property="Background" Value="Red" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -97,13 +95,51 @@
                 </TextBlock>
             </StatusBarItem>
             <Separator Opacity=".5" />
-            <!--<StatusBarItem>
-                <TextBlock Text="{Binding Location.Course, StringFormat={}כיוון נסיעה: {0:0}}" />
-            </StatusBarItem>-->
+            <StatusBarItem>
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="Bot not active" />
+                            <Setter Property="Background" Value="Gray" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBotActive}" Value="True">
+                                    <Setter Property="Text" Value="Bot is active" />
+                                    <Setter Property="Background" Value="LawnGreen" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StatusBarItem>
+            <Separator Opacity=".5" />
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="5,0" Text="Liked" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[LikeCounter], StringFormat=\{0:D\}}" />
+                    <TextBlock Margin="5,0" Text="Next Like:" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[Like], StringFormat=\{0:D\}}" />
+
+
+
+                    <TextBlock Margin="5,0" Text="Followed" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[Follow], StringFormat=\{0:D\}}" />
+
+                    <TextBlock Margin="5,0" Text="Unfollowed" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[Unfollow], StringFormat=\{0:D\}}" />
+
+                    <TextBlock Margin="5,0" Text="Commented" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[Comment], StringFormat=\{0:D\}}" />
+
+                </StackPanel>
+
+            </StatusBarItem>
         </StatusBar>
 
         <StackPanel Grid.Column="0" Orientation="Vertical">
-            <Expander Height="Auto" ExpandDirection="Right">
+            <Expander
+                Height="Auto"
+                ExpandDirection="Right"
+                IsExpanded="True">
                 <Expander.Header>
                     <TextBlock RenderTransformOrigin=".5,.5" Text="Login">
                         <TextBlock.LayoutTransform>
@@ -138,17 +174,34 @@
                             x:Name="PasswordBox"
                             Width="150"
                             helpers:PasswordHelper.Attach="True"
-                            helpers:PasswordHelper.Password="{Binding Password}"
+                            helpers:PasswordHelper.Password="{Binding Password, Mode=TwoWay}"
                             materialDesign:HintAssist.Hint="Password" />
 
                     </StackPanel>
-                    <Button
-                        Margin="0,4,0,4"
-                        Click="Button_Click"
-                        Style="{StaticResource MaterialDesignRaisedLightButton}"
-                        ToolTip="Login">
-                        Login
-                    </Button>
+                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                        <Button
+                            Margin="4,0"
+                            Click="Login_Click"
+                            Content="Login"
+                            Style="{StaticResource MaterialDesignRaisedLightButton}"
+                            ToolTip="Login" />
+                        <Button
+                            x:Name="BotButton"
+                            Margin="4,0"
+                            Click="Bot_Click"
+                            Content="Start Bot"
+                            IsEnabled="False"
+                            Style="{StaticResource MaterialDesignRaisedLightButton}"
+                            ToolTip="Start Bot" />
+                        <Button
+                            x:Name="BotStopButton"
+                            Margin="4,0"
+                            Click="Bot_Click"
+                            Content="Stop Bot"
+                            Style="{StaticResource MaterialDesignRaisedLightButton}"
+                            ToolTip="Stop Bot"
+                            Visibility="Collapsed" />
+                    </StackPanel>
 
                     <StackPanel Orientation="Vertical">
                         <materialDesign:Flipper Style="{StaticResource MaterialDesignCardFlipper}">
@@ -277,6 +330,7 @@
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -379,12 +433,94 @@
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <Button Content="{Binding LoggedInUser.user.username, FallbackValue=Please Login}" />
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            VerticalAlignment="Center">
+                            Save Follow list
+                        </TextBlock>
+                        <ToggleButton
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            IsChecked="True"
+                            Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                            ToolTip="MaterialDesignSwitchToggleButton" />
                     </Grid>
+                </StackPanel>
+            </Expander>
+
+            <Expander Height="Auto" ExpandDirection="Right">
+                <Expander.Header>
+                    <TextBlock RenderTransformOrigin=".5,.5" Text="Tags">
+                        <TextBlock.LayoutTransform>
+                            <RotateTransform Angle="90" />
+                        </TextBlock.LayoutTransform>
+                    </TextBlock>
+                </Expander.Header>
+                <StackPanel
+                    Margin="8,24,16,24"
+                    Orientation="Vertical"
+                    TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">Search by</TextBlock>
+                        <RadioButton IsChecked="{Binding TagSelected}" Style="{StaticResource MaterialDesignRadioButton}">
+                            Tags
+                        </RadioButton>
+                        <RadioButton IsChecked="{Binding GeoIdSelected}" Style="{StaticResource MaterialDesignRadioButton}">
+                            GeoId
+                        </RadioButton>
+                        <RadioButton IsChecked="{Binding GeoNameSelected}" Style="{StaticResource MaterialDesignRadioButton}">
+                            Geo Name
+                        </RadioButton>
+                    </StackPanel>
+                    <Grid Width="200" HorizontalAlignment="Left">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            TextAlignment="Left">
+                            Tags
+                        </TextBlock>
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            MinWidth="120"
+                            VerticalAlignment="Stretch"
+                            materialDesign:HintAssist.Hint="Tags list seperate by ','"
+                            AcceptsReturn="True"
+                            SpellCheck.IsEnabled="True"
+                            Text="{Binding TagsList, Mode=TwoWay}"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            TextAlignment="Left">
+                            Stop Words
+                        </TextBlock>
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            MinWidth="120"
+                            VerticalAlignment="Stretch"
+                            materialDesign:HintAssist.Hint="Tags list seperate by ','"
+                            AcceptsReturn="True"
+                            SpellCheck.IsEnabled="True"
+                            Text="{Binding StopWordList, Mode=TwoWay}"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto" />
 
 
-
-
+                    </Grid>
                 </StackPanel>
             </Expander>
         </StackPanel>

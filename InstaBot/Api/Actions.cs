@@ -26,10 +26,15 @@
         {
             InstaInfo.Login = login;
             InstaInfo.Password = password;
+
+            var loginDetail = new { Login = login, Password = password};
+            new FileInfo(Environment.CurrentDirectory + "\\data\\").Directory.Create();
+            File.WriteAllText(Environment.CurrentDirectory + "\\data\\logininfo.dat", JsonConvert.SerializeObject(loginDetail));
+
             InstaInfo.Uuid = GenerateData.UUID(true);
             InstaInfo.DeviceId = GenerateData.DeviceId();
 
-            Console.WriteLine(InstaInfo.Uuid + " - " + InstaInfo.DeviceId);
+            Console.WriteLine($"{InstaInfo.Uuid} - {InstaInfo.DeviceId}");
 
             InstaInfo.CookieContainer = new CookieContainer();
 
