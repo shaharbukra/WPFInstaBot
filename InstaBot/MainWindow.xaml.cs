@@ -67,14 +67,36 @@ namespace InstaBot
            
         }
 
-        private void WriteLog(string log)
+        private void WriteLog(string log, string url)
         {
+            logTxtBox.Inlines.Add(new Run(log));
+
+            if (url != null)
+            {
+                var urlRun = new Run(url);
+                Hyperlink hyperlink = new Hyperlink(urlRun)
+                {
+                    NavigateUri = new Uri(url)
+                };
+                hyperlink.RequestNavigate += Hyperlink_RequestNavigate;
+
+                logTxtBox.Inlines.Add(hyperlink);
+
+            }
+            logTxtBox.Inlines.Add(Environment.NewLine);
+
+            //logTxtBox.Text = log + Environment.NewLine + logTxtBox.Text;
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(e.Uri.ToString());
+
         }
 
         private async void Login_Click(object sender, RoutedEventArgs e)
         {
-            var action = (sender as Button).Content.ToString();
-            await HandleLoginActionAsync(action);
+            await HandleLoginActionAsync(LoginBtn.Content.ToString());
 
 
         }
@@ -87,37 +109,23 @@ namespace InstaBot
                     if (await AutoBot.LoginAsync())
                     {
                         BotButton.IsEnabled = true;
+                        LoginBtn.Content = "Logout";
                     }
                     break;
                 case "Logout":
                     Log.WriteLog("Logout success!");
+                    LoginBtn.Content = "Login";
                     BotButton.IsEnabled = false;
+                    await HandleStopBot("Stop Bot");
                     break;
                 default:
                     break;
             }
         }
 
-
-        private void OpenInstagramProfile(object sender, RoutedEventArgs e)
+        private async Task HandleStopBot(string action)
         {
-            if (AutoBot.LoggedInUser != null)
-            {
-                System.Diagnostics.Process.Start("https://www.instagram.com/" + AutoBot.LoggedInUser.user.username);
-            }
-        }
-
-        private void UIElement_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            var code = ((FeedItem)(sender as StackPanel)?.DataContext)?.code;
-            System.Diagnostics.Process.Start($"https://www.instagram.com/p/{code}");
-
-        }
-
-        private async void Bot_Click(object sender, RoutedEventArgs e)
-        {
-            var action = (sender as Button).Content;
-            switch (action.ToString())
+            switch (action)
             {
                 case "Start Bot":
                     action = "Stop Bot";
@@ -135,7 +143,28 @@ namespace InstaBot
                 default:
                     break;
             }
+        }
 
+
+        private void OpenInstagramProfile(object sender, RoutedEventArgs e)
+        {
+            if (AutoBot.LoggedInUser != null)
+            {
+                System.Diagnostics.Process.Start("https://www.instagram.com/" + AutoBot.LoggedInUser.user.username);
+            }
+        }
+
+        private void OpenBrowser_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var code = ((FeedItem)(sender as Image)?.DataContext)?.code;
+            System.Diagnostics.Process.Start($"https://www.instagram.com/p/{code}");
+
+        }
+
+        private async void Bot_Click(object sender, RoutedEventArgs e)
+        {
+            var action = (sender as Button).Content.ToString();
+            HandleStopBot(action);
         }
 
         private void BotButton_Click(object sender, MouseButtonEventArgs e)

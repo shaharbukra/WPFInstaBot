@@ -24,6 +24,7 @@ namespace InstaBot.Objects
         private ObservableCollection<FeedItem> _userFeedData = new ObservableCollection<FeedItem>();
         private bool _isBusy;
         private bool _isBotActive;
+        private int _totalLikes = 0;
 
         public bool IsBusy
         {
@@ -81,6 +82,7 @@ namespace InstaBot.Objects
             }
         }
 
+        public int LikeTimer => NextIteration["Like"] == 0 ? 0 : NextIteration["Like"] - DateNow;
 
         public List<int> LongListTill1000 => Enumerable.Range(0, 1000).ToList();
         public List<int> LongListTill200 => Enumerable.Range(0, 200).ToList();
@@ -89,7 +91,7 @@ namespace InstaBot.Objects
 
         public int SelectedMaxLikes { get; set; } = 300;
 
-        public int SelectedLikePerHour { get; set; } = 15;
+        public int SelectedLikePerHour { get; set; } = 60;
         public int SelectedLikeDelayPerHour => 3600 / SelectedLikePerHour;
 
         public int SelectedFollowPerHour { get; set; } = 0;
@@ -192,6 +194,7 @@ namespace InstaBot.Objects
 
         public static int DateNow => (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
         public Random Random = new Random(DateNow);
+        
 
 
         #endregion Data members
@@ -239,12 +242,28 @@ namespace InstaBot.Objects
         public async Task<bool> LoginAsync()
         {
             IsBusy = true;
+            UserDetail loginUserDetail = null;
+            Log.WriteLog($"Try to login as {InstaInfo.Login}...");
 
-            var loginUserDetail = await Actions.Login(InstaInfo.Login, InstaInfo.Password);
+
+            if (File.Exists(Environment.CurrentDirectory + $@"\data\{InstaInfo.Login}-session.dat") 
+                //&&
+                //System.Windows.MessageBox.Show("You have saved session, use it?", "Login method",
+                //    MessageBoxButton.YesNo, MessageBoxImage.Exclamation) == MessageBoxResult.Yes
+                )
+            {
+                loginUserDetail = await Actions.LoginFromFile(InstaInfo.Login, InstaInfo.Password);
+                //return false;
+            }
+            else
+            {
+                loginUserDetail = await Actions.Login(InstaInfo.Login, InstaInfo.Password);
+            }
+
             if (loginUserDetail != null)
             {
                 LoggedInUser = loginUserDetail;
-                //await GetSelfFeedAsync();
+                IsBusy = false;
                 return true;
             }
             else
@@ -258,6 +277,7 @@ namespace InstaBot.Objects
         public async Task StartBot()
         {
             IsBotActive = true;
+            Log.WriteLog($"Start Bot!");
 
             while (IsBotActive)
             {
@@ -270,6 +290,7 @@ namespace InstaBot.Objects
                         NextIteration["Like"] = DateNow;
                 }
 
+                RaisePropertyChanged("LikeTimer");
                 await Task.Delay(1000);
             }
 
@@ -278,7 +299,7 @@ namespace InstaBot.Objects
 
         public async Task<bool> AutoModHelper(string type)
         {
-            if (MediaByTagCount > 0)
+            if (MediaByTagCount > 0 && InstaInfo.NumberOfLikePerTag > 0)
             {
                 try
                 {
@@ -286,6 +307,9 @@ namespace InstaBot.Objects
                     {
                         case "like":
                             await LikeTag();
+                            break;
+                        case "comment":
+                            await CommentTag();
                             break;
                         default:
                             break;
@@ -304,7 +328,10 @@ namespace InstaBot.Objects
             {
                 var tags = TagsList.Split(',');
                 var selectedTag = tags[Random.Next(0, tags.Length)];
-                Log.WriteLog("The Selected tag is " + selectedTag + "....");
+                InstaInfo.NumberOfLikePerTag = Random.Next(5, 20);
+
+                Log.WriteLog($"Going to like {selectedTag} for {InstaInfo.NumberOfLikePerTag} times....");
+
 
                 if (TagSelected)
                 {
@@ -336,15 +363,63 @@ namespace InstaBot.Objects
 
                 if (await Actions.Like(tagToLike.pk))
                 {
-                    Log.WriteLog($"Success liking with url https://www.instagram.com/p/{tagToLike.code}");
+                    Log.WriteLog($"Success liking with url ", $"https://www.instagram.com/p/{tagToLike.code}");
                     NextIteration["LikeCounter"]++;
                     UserFeedData.Add(tagToLike);
                     MediaByTag.Remove(tagToLike);
                     MediaByTagCount--;
+
+                    InstaInfo.NumberOfLikePerTag--;
+
+                    if (InstaInfo.NumberOfLikePerTag == 0)
+                    {
+                        MediaByTag.Clear();
+                        MediaByTagCount = 0;
+                    }
+
+                    RaisePropertyChanged("UserFeedData");
+
                     return true;
                 }
 
-                Log.WriteLog($"Failed to like with url https://www.instagram.com/p/{tagToLike.code}");
+                Log.WriteLog($"Failed to like with url ", $"https://www.instagram.com/p/{tagToLike.code}");
+                MediaByTag.Remove(tagToLike);
+                MediaByTagCount--;
+            }
+            else
+            {
+                Log.WriteLog($"Too many likes -", $"https://www.instagram.com/p/{tagToLike.code}");
+            }
+
+            return false;
+        }
+
+        private async Task<bool> CommentTag()
+        {
+            var tagToLike = MediaByTag[Random.Next(0, MediaByTag.Count)];
+            if (tagToLike.like_count > SelectedMinLikes && tagToLike.like_count < SelectedMaxLikes)
+            {
+
+                Log.WriteLog($"Try to like media_id {tagToLike.pk} ....");
+
+                if (await Actions.Like(tagToLike.pk))
+                {
+                    Log.WriteLog($"Success liking with url ", $"https://www.instagram.com/p/{tagToLike.code}");
+                    NextIteration["LikeCounter"]++;
+                    UserFeedData.Add(tagToLike);
+                    MediaByTag.Remove(tagToLike);
+                    MediaByTagCount--;
+
+                    if (UserFeedData.Count % InstaInfo.NumberOfLikePerTag == 0)
+                    {
+                        MediaByTag.Clear();
+                        MediaByTagCount = 0;
+                    }
+
+                    return true;
+                }
+
+                Log.WriteLog($"Failed to like with url", $"https://www.instagram.com/p/{tagToLike.code}");
                 MediaByTag.Remove(tagToLike);
                 MediaByTagCount--;
             }
@@ -360,8 +435,36 @@ namespace InstaBot.Objects
                 var feedData = JsonConvert.DeserializeObject<FeedData>(InstaInfo.LastResponse);
                 if (feedData.items.Count > 0)
                 {
-                    MediaByTag = feedData.items;
-                    MediaByTagCount = feedData.items.Count;
+                    MediaByTag = new List<FeedItem>();
+                        
+                    var stopWords = StopWordList.Split(',').ToList().Select(w=>w.Trim().ToLower());
+                    try
+                    {
+                        foreach (var item in feedData.items)
+                        {
+                            if (item.caption == null)
+                            {
+                                MediaByTag.Add(item);
+                            }
+                            else
+                            {
+                                var isContainStopWord = stopWords.Any(w => item.caption.text.ToLower().Contains(w));
+                                if (!isContainStopWord)
+                                {
+                                    MediaByTag.Add(item);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+
+                    MediaByTagCount = MediaByTag.Count;
+
+                    //MediaByTag = feedData.items;
+                    //MediaByTagCount = feedData.items.Count;
                     Log.WriteLog("Succes! Got " + MediaByTagCount + " media_id.");
                 }
                 else if(feedData.ranked_items.Count>0)

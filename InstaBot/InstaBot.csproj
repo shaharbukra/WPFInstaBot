@@ -97,6 +97,7 @@
     <Compile Include="Objects\InstagramData\FeedData.cs" />
     <Compile Include="Objects\InstagramData\FeedItemsData.cs" />
     <Compile Include="Objects\InstagramData\InboxData.cs" />
+    <Compile Include="Objects\InstagramData\SessionInfo.cs" />
     <Compile Include="Objects\InstaInfo.cs" />
     <Compile Include="Objects\InstagramData\UserDetail.cs" />
     <Compile Include="Objects\Models\ModelBase.cs" />

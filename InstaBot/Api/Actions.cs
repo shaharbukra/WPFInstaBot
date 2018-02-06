@@ -16,6 +16,87 @@
     /// </summary>
     internal class Actions
     {
+        public static async Task<UserDetail> LoginFromFile(string login, string password)
+        {
+            InstaInfo.Login = login;
+            InstaInfo.Password = password;
+            var session = File.ReadAllText(Environment.CurrentDirectory + "\\data\\" + login + "-session.dat");
+            try
+            {
+                var sessionDataDecrypt = Hash.Decrypt(session, password);
+                Log.WriteLog($"Successed loaded {InstaInfo.Login} data from file!");
+                if (sessionDataDecrypt != null)
+                {
+                    var sessionData = JsonConvert.DeserializeObject<SessionInfo>(sessionDataDecrypt);
+                    InstaInfo.Uuid = sessionData.uuid;
+                    InstaInfo.SessionId= sessionData.sessionid;
+                    InstaInfo.DeviceId = sessionData.device_id;
+                    InstaInfo.Mid = sessionData.mid;
+                    InstaInfo.CsrfToken = sessionData.csrftoken;
+                    InstaInfo.UserNameId = sessionData.username_id;
+                    InstaInfo.RankToken = sessionData.username_id + "_" + sessionData.uuid;
+                    InstaInfo.CookieContainer = new CookieContainer();
+                    InstaInfo.CookieContainer.Add(new Cookie("csrftoken", InstaInfo.CsrfToken){Domain = "i.instagram.com" });
+                    InstaInfo.CookieContainer.Add(new Cookie("mid", InstaInfo.Mid) { Domain = "i.instagram.com" });
+                    InstaInfo.CookieContainer.Add(new Cookie("sessionid", InstaInfo.SessionId) { Domain = "i.instagram.com" });
+
+
+                    var postData = new Dictionary<string, string>
+                    {
+                        { "phone_id", GenerateData.UUID(true) },
+                        { "_csrftoken", InstaInfo.CsrfToken },
+                        { "username", InstaInfo.Login },
+                        { "guid", InstaInfo.Uuid },
+                        { "device_id", InstaInfo.DeviceId },
+                        { "password", InstaInfo.Password },
+                        { "login_attempt_count", "0" }
+                    };
+                    var post = JsonConvert.SerializeObject(postData).ToString();
+
+                    if (await GetTimelineFeedAsync())
+                    {
+                        Console.WriteLine("GetTimelineFeedAsync success");
+                        if (await GetV2InboxAsync())
+                        {
+                            Console.WriteLine("GetV2InboxAsync success");
+                            if (await GetRecentActivityAsync())
+                            {
+                                Console.WriteLine("GetRecentActivityAsync success");
+                                if (await GetUsernameInfoAsync(InstaInfo.UserNameId))
+                                {
+                                    Log.WriteLog($"Successed login with user {InstaInfo.Login}!");
+
+                                    var userDetail = JsonConvert.DeserializeObject<UserDetail>(InstaInfo.LastResponse);
+                                    if (userDetail != null)
+                                    {
+                                        return userDetail;
+                                    }
+                                }
+                            }
+                             
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+
+            return null;
+        }
+
+        private static async Task<bool> GetRecentActivityAsync()
+        {
+            if (await Request.SendRequestAsync("news/inbox/?", null, false))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
         /// <summary>
         /// The Login
         /// </summary>
@@ -27,12 +108,12 @@
             InstaInfo.Login = login;
             InstaInfo.Password = password;
 
+            InstaInfo.Uuid = GenerateData.UUID(true);
+            InstaInfo.DeviceId = GenerateData.DeviceId();
+
             var loginDetail = new { Login = login, Password = password};
             new FileInfo(Environment.CurrentDirectory + "\\data\\").Directory.Create();
             File.WriteAllText(Environment.CurrentDirectory + "\\data\\logininfo.dat", JsonConvert.SerializeObject(loginDetail));
-
-            InstaInfo.Uuid = GenerateData.UUID(true);
-            InstaInfo.DeviceId = GenerateData.DeviceId();
 
             Console.WriteLine($"{InstaInfo.Uuid} - {InstaInfo.DeviceId}");
 
@@ -58,6 +139,9 @@
                 {
                     InstaInfo.LoginStatus = true;
                     InstaInfo.RankToken = InstaInfo.UserNameId + "_" + InstaInfo.Uuid;
+                    Log.WriteLog($"Successed login with user {InstaInfo.Login}!");
+
+                    #region test
                     //if (await GetZeroRatingTokenResult())
                     //{
                     //    if (await GetBootstrapUsers())
@@ -68,29 +152,32 @@
                     //    {
 
                     //    }
-                        //if (await SyncUsersFeaturesAsync())
-                        //{
-                        //    if (await Direct.GetRankedRecipients("reshare",true))
-                        //    {
-                        //        if (await Direct.GetRankedRecipients("raven", true))
-                        //        {
-                        //            if (await Direct.GetInbox())
-                        //            {
-                        //                if (await GetProfileNotice())
-                        //                {
-                        //                    if (await People.GetRecentActivityInbox())
-                        //                    {
-                        //                        if (await GetQPFetch())
-                        //                        {
+                    //if (await SyncUsersFeaturesAsync())
+                    //{
+                    //    if (await Direct.GetRankedRecipients("reshare",true))
+                    //    {
+                    //        if (await Direct.GetRankedRecipients("raven", true))
+                    //        {
+                    //            if (await Direct.GetInbox())
+                    //            {
+                    //                if (await GetProfileNotice())
+                    //                {
+                    //                    if (await People.GetRecentActivityInbox())
+                    //                    {
+                    //                        if (await GetQPFetch())
+                    //                        {
 
-                        //                        }
-                        //                    }
-                        //                }
-                        //            }
-                        //        }
-                        //    }
-                        //}
+                    //                        }
+                    //                    }
+                    //                }
+                    //            }
+                    //        }
+                    //    }
                     //}
+                    //}
+                    #endregion test
+
+
 
                     if (await SyncUsersFeaturesAsync())
                     {
@@ -128,6 +215,7 @@
                 }
                 else
                 {
+                    Log.WriteLog("faild to login: " + InstaInfo.LastResponse);
                     var a = "Asd";
                 }
 
@@ -369,6 +457,24 @@
 
             }
             return null;
+        }
+
+        private static async Task<bool> GetV2InboxAsync()
+        {
+            if (await Request.SendRequestAsync("direct_v2/inbox/?", null, false))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static async Task<bool> GetTimelineFeedAsync()
+        {
+            if (await Request.SendRequestAsync("feed/timeline/", null, false))
+            {
+                return true;
+            }
+            return false;
         }
 
     }

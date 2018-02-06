@@ -8,7 +8,7 @@ namespace InstaBot.Callbacks
 {
     public static class CallBackLog
     {
-        public delegate void callbackEvent(string log);
+        public delegate void callbackEvent(string log, string url);
 
         public static callbackEvent CallbackEventHandler;
     }

@@ -7,6 +7,7 @@ namespace InstaBot.Helpers
 {
     internal class GenerateData
     {
+        private static string CommentsList = string.Empty;
         private static Random random = new Random();
         internal static string UUID(bool type)
         {
@@ -30,5 +31,43 @@ namespace InstaBot.Helpers
             string hash = BitConverter.ToString(Helpers.Hash.HmacSHA256(data, InstaInfo.IgSigKey)).Replace("-", "").ToLower();
             return "ig_sig_key_version=" + InstaInfo.SigKeyVersion + "&signed_body=" + hash + "." + WebUtility.UrlEncode(data);
         }
+
+
+        internal static string Comment()
+        {
+            var comment = "";
+            var random  = new Random(InstaInfo.DateNow);
+            if (CommentsList == null)
+            {
+                LoadCommentsList();
+            }
+            if (!string.IsNullOrEmpty(CommentsList))
+            {
+                var c_a = CommentsList.Split(';');
+                for (var i = 0; i < c_a.Length; i++)
+                {
+                    var t_str = c_a[i].Split(',');
+                    comment += t_str[random.Next(0, t_str.Length)];
+                    if (i < c_a.Length - 2)
+                    {
+                        comment += " ";
+                    }
+                }
+            }
+            return comment;
+        }
+
+        private static void LoadCommentsList()
+        {
+            try
+            {
+                CommentsList = File.ReadAllText(Environment.CurrentDirectory + @"\data\comments.dat");
+            }
+            catch
+            {
+                File.WriteAllText(Environment.CurrentDirectory + @"\data\comments.dat", "this,the,your,This,The,Your;photo,picture,pic,shot,snapshot;is,looks,feels,is really;great,super,good,very good,wow,WOW,cool,GREAT,magnificent,magical,very cool,stylish,so stylish,beautiful,so beautiful,so stylish,so professional,lovely,so lovely,very lovely,glorious,so glorious,very glorious,adorable,excellent,amazing;.,..,...,!,!!,!!!, :)");
+            }
+        }
+
     }
 }
