@@ -13,10 +13,11 @@ namespace InstaBot.Helpers
     {
         public static void WriteLog(string log, string url=null)
         {
-            string writeLog = DateTime.Now + ". " + log;
+            var urlString = url ?? string.Empty;
+            string writeLog = DateTime.Now + ". " + log + urlString;
             new FileInfo(Environment.CurrentDirectory + "\\data\\").Directory.Create();
-            File.AppendAllText(Environment.CurrentDirectory + "\\data\\" + InstaInfo.Login + "-log.txt", writeLog + Environment.NewLine);
-            CallBackLog.CallbackEventHandler(writeLog, url);
+            File.AppendAllText($@"{Environment.CurrentDirectory}\data\{InstaInfo.Login}-{DateTime.Now:dd.MM.yyyy}-log.txt", writeLog + Environment.NewLine);
+            CallBackLog.CallbackEventHandler(DateTime.Now + ". " + log, url);
         }
     }
 }

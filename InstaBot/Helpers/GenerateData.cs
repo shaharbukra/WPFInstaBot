@@ -1,6 +1,7 @@
 ﻿using InstaBot.Objects;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace InstaBot.Helpers
@@ -67,6 +68,16 @@ namespace InstaBot.Helpers
             {
                 File.WriteAllText(Environment.CurrentDirectory + @"\data\comments.dat", "this,the,your,This,The,Your;photo,picture,pic,shot,snapshot;is,looks,feels,is really;great,super,good,very good,wow,WOW,cool,GREAT,magnificent,magical,very cool,stylish,so stylish,beautiful,so beautiful,so stylish,so professional,lovely,so lovely,very lovely,glorious,so glorious,very glorious,adorable,excellent,amazing;.,..,...,!,!!,!!!, :)");
             }
+        }
+
+        public static string SpliceText(string text, int lineLength)
+        {
+            var charCount = 0;
+            var lines = text.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries)
+                .GroupBy(w => (charCount += w.Length + 1) / lineLength)
+                .Select(g => string.Join(" ", g));
+
+            return String.Join("\n", lines.ToArray());
         }
 
     }

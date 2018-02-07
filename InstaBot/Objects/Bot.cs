@@ -2,6 +2,7 @@
 using InstaBot.Objects.InstagramData;
 using InstaBot.Objects.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -10,7 +11,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Esri.ArcGISRuntime.Geometry;
+using Esri.ArcGISRuntime.Mapping.Popups;
+using Esri.ArcGISRuntime.Symbology;
+using Esri.ArcGISRuntime.UI;
 using InstaBot.Helpers;
 using Newtonsoft.Json;
 
@@ -21,11 +27,16 @@ namespace InstaBot.Objects
       
         #region Data members
         private UserDetail _loggedInUser;
+
         private ObservableCollection<FeedItem> _userFeedData = new ObservableCollection<FeedItem>();
+    //    {
+    //        JsonConvert.DeserializeObject<FeedItem>("{\"taken_at\":1517904674,\"pk\":\"1708630710656856315\",\"id\":\"1708630710656856315_233992139\",\"device_timestamp\":1517904557703,\"media_type\":1,\"code\":\"Be2RpQhBnD7\",\"client_cache_key\":\"MTcwODYzMDcxMDY1Njg1NjMxNQ==.2\",\"filter_type\":112,\"image_versions2\":{\"candidates\":[{\"width\":750,\"height\":937,\"url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/1a850c8f1ab60d8e9d458f5507ca6fda/5B189093/t51.2885-15/sh0.08/e35/p750x750/26873067_2048095632133567_6997638057566404608_n.jpg?ig_cache_key=MTcwODYzMDcxMDY1Njg1NjMxNQ%3D%3D.2\"},{\"width\":240,\"height\":300,\"url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/3a7302c837ecd54a6bbc1a8458490e1d/5B1926D4/t51.2885-15/e35/p240x240/26873067_2048095632133567_6997638057566404608_n.jpg?ig_cache_key=MTcwODYzMDcxMDY1Njg1NjMxNQ%3D%3D.2\"}],\"candidate\":{\"width\":750,\"height\":937,\"url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/1a850c8f1ab60d8e9d458f5507ca6fda/5B189093/t51.2885-15/sh0.08/e35/p750x750/26873067_2048095632133567_6997638057566404608_n.jpg?ig_cache_key=MTcwODYzMDcxMDY1Njg1NjMxNQ%3D%3D.2\"}},\"original_width\":1080,\"original_height\":1350,\"user\":{\"pk\":233992139,\"username\":\"itsik92\",\"full_name\":\"Itsik Kuzenogi\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/4c722f25ad9fc05c6afcb3d4136b511e/5B19E30F/t51.2885-19/s150x150/26398996_144356082937699_8514693984814104576_n.jpg\",\"profile_pic_id\":\"1692100417158607070_233992139\",\"is_verified\":false,\"has_anonymous_profile_picture\":false,\"media_count\":0,\"geo_media_count\":0,\"follower_count\":0,\"following_count\":0,\"biography\":null,\"external_url\":null,\"can_boost_post\":false,\"can_see_organic_insights\":false,\"show_insights_terms\":false,\"can_convert_to_business\":false,\"can_create_sponsor_tags\":false,\"can_be_tagged_as_sponsor\":false,\"reel_auto_archive\":null,\"is_profile_action_needed\":false,\"usertags_count\":0,\"usertag_review_enabled\":false,\"is_needy\":false,\"has_chaining\":false,\"hd_profile_pic_versions\":null,\"hd_profile_pic_url_info\":null,\"is_business\":false,\"show_business_conversion_icon\":false,\"show_conversion_edit_entry\":false,\"aggregate_promote_engagement\":false,\"allowed_commenter_type\":null,\"is_video_creator\":false,\"has_profile_video_feed\":false,\"has_highlight_reels\":false,\"include_direct_blacklist_status\":false,\"can_follow_hashtag\":false,\"besties_count\":0,\"show_besties_badge\":false,\"auto_expand_chaining\":false},\"caption\":{\"pk\":17905481266082220,\"user_id\":233992139,\"text\":\"שלישי פעמיים כי טוב 🤗\\nזה שלישי עם חופש !\\n#חופש #אשדוד  #ישראל #שלישי #טוב #שבוע #טוב #שבועטוב  #לייק #like #ashdod #israel #ашдод  #израиль  #лайк\",\"type\":1,\"created_at\":1517904675,\"created_at_utc\":1517904675,\"content_type\":\"comment\",\"status\":\"Active\",\"bit_flags\":0,\"user\":{\"pk\":233992139,\"username\":\"itsik92\",\"full_name\":\"Itsik Kuzenogi\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/4c722f25ad9fc05c6afcb3d4136b511e/5B19E30F/t51.2885-19/s150x150/26398996_144356082937699_8514693984814104576_n.jpg\",\"profile_pic_id\":\"1692100417158607070_233992139\",\"friendship_status\":{\"following\":false,\"outgoing_request\":false,\"is_bestie\":false},\"is_verified\":false,\"has_anonymous_profile_picture\":false,\"is_unpublished\":false,\"is_favorite\":false},\"did_report_as_spam\":false,\"media_id\":1708630710656856315,\"has_translation\":true},\"caption_is_edited\":false,\"like_count\":91,\"has_liked\":false,\"top_likers\":null,\"comment_likes_enabled\":false,\"comment_threading_enabled\":true,\"has_more_comments\":true,\"next_max_id\":17910001768111570,\"max_num_visible_preview_comments\":2,\"preview_comments\":[{\"pk\":17923315261044405,\"user_id\":233992139,\"text\":\"@roeekay שלוק גם נחשב 😂\",\"type\":2,\"created_at\":1517914993,\"created_at_utc\":1517914993,\"content_type\":\"comment\",\"status\":\"Active\",\"bit_flags\":0,\"user\":{\"pk\":233992139,\"username\":\"itsik92\",\"full_name\":\"Itsik Kuzenogi\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/4c722f25ad9fc05c6afcb3d4136b511e/5B19E30F/t51.2885-19/s150x150/26398996_144356082937699_8514693984814104576_n.jpg\",\"profile_pic_id\":\"1692100417158607070_233992139\",\"is_verified\":false},\"did_report_as_spam\":false,\"media_id\":1708630710656856315,\"has_translation\":true},{\"pk\":17910001768111570,\"user_id\":3167481285,\"text\":\"איזה נשרט\",\"type\":0,\"created_at\":1517984774,\"created_at_utc\":1517984774,\"content_type\":\"comment\",\"status\":\"Active\",\"bit_flags\":0,\"user\":{\"pk\":3167481285,\"username\":\"omrynidam2\",\"full_name\":\"omry nidam\",\"is_private\":true,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/062a7d33fe7b229af8ed73dba4a62ba0/5B0F6950/t51.2885-19/s150x150/22582186_181076035801182_3212074752118095872_n.jpg\",\"profile_pic_id\":\"1629938681551220097_3167481285\",\"is_verified\":false},\"did_report_as_spam\":false,\"media_id\":1708630710656856315,\"has_translation\":true}],\"comment_count\":7,\"photo_of_you\":false,\"can_viewer_save\":true,\"organic_tracking_token\":\"eyJ2ZXJzaW9uIjo1LCJwYXlsb2FkIjp7ImlzX2FuYWx5dGljc190cmFja2VkIjpmYWxzZSwidXVpZCI6ImUzYWNjMDNiODIzODQ2MTliZWRkYzhmMWFlNmE5ODZlMTcwODYzMDcxMDY1Njg1NjMxNSIsInNlcnZlcl90b2tlbiI6IjE1MTc5ODcyMDY2MDl8MTcwODYzMDcxMDY1Njg1NjMxNXwzMTk5NzQyOXwwOTIwYzk0MWMxNDhmYmUyMmFiMjlmOTc2ODQzNjBmZDQxOTg1MmE4NGEwYzNhYTJjNTIyMjVjMGVhNDY0NjdhIn0sInNpZ25hdHVyZSI6IiJ9\",\"preview\":null,\"likers\":null,\"usertags\":{\"in\":[{\"user\":{\"pk\":49188784,\"username\":\"castrofashion\",\"full_name\":\"CASTRO\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/3e6b74ab4eaead34ac64e56fc64fa18c/5B0DD376/t51.2885-19/11848944_827230584032805_1057437513_a.jpg\",\"is_verified\":true},\"position\":[0.8552246,0.9111111],\"start_time_in_video_in_sec\":null,\"duration_in_video_in_sec\":null},{\"user\":{\"pk\":242236354,\"username\":\"asics\",\"full_name\":\"ASICS America\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/f1ef21b4d95a162d8d345f797edb9826/5B16C436/t51.2885-19/s150x150/20478588_939622722843855_3593631451897135104_a.jpg\",\"profile_pic_id\":\"1571203001879583329_242236354\",\"is_verified\":true},\"position\":[0.8640747,0.92890626],\"start_time_in_video_in_sec\":null,\"duration_in_video_in_sec\":null},{\"user\":{\"pk\":1310042385,\"username\":\"mjmaniajeans\",\"full_name\":\"Mania Jeans\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/9d685146523fa2b809439e8ff28ef622/5B23179D/t51.2885-19/s150x150/17662605_417394858605258_4917581152685916160_a.jpg\",\"profile_pic_id\":\"1481735901804843829_1310042385\",\"is_verified\":false},\"position\":[0.9305556,0.86032987],\"start_time_in_video_in_sec\":null,\"duration_in_video_in_sec\":null}]},\"injected\":null,\"collapse_comments\":null,\"dominant_color\":null,\"fb_page_url\":null,\"location\":{\"pk\":215021641.0,\"name\":\"Ashdod\",\"address\":\"\",\"city\":\"\",\"short_name\":\"Ashdod\",\"lng\":34.65,\"lat\":31.8,\"external_source\":\"facebook_places\",\"facebook_places_id\":105695102798184},\"lat\":31.8,\"lng\":34.65,\"suggested_invites\":null}"),
+    //        JsonConvert.DeserializeObject<FeedItem>("{\"taken_at\":1517904674,\"pk\":\"1708630710656856315\",\"id\":\"1708630710656856315_233992139\",\"device_timestamp\":1517904557703,\"media_type\":1,\"code\":\"Be2RpQhBnD7\",\"client_cache_key\":\"MTcwODYzMDcxMDY1Njg1NjMxNQ==.2\",\"filter_type\":112,\"image_versions2\":{\"candidates\":[{\"width\":750,\"height\":937,\"url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/1a850c8f1ab60d8e9d458f5507ca6fda/5B189093/t51.2885-15/sh0.08/e35/p750x750/26873067_2048095632133567_6997638057566404608_n.jpg?ig_cache_key=MTcwODYzMDcxMDY1Njg1NjMxNQ%3D%3D.2\"},{\"width\":240,\"height\":300,\"url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/3a7302c837ecd54a6bbc1a8458490e1d/5B1926D4/t51.2885-15/e35/p240x240/26873067_2048095632133567_6997638057566404608_n.jpg?ig_cache_key=MTcwODYzMDcxMDY1Njg1NjMxNQ%3D%3D.2\"}],\"candidate\":{\"width\":750,\"height\":937,\"url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/1a850c8f1ab60d8e9d458f5507ca6fda/5B189093/t51.2885-15/sh0.08/e35/p750x750/26873067_2048095632133567_6997638057566404608_n.jpg?ig_cache_key=MTcwODYzMDcxMDY1Njg1NjMxNQ%3D%3D.2\"}},\"original_width\":1080,\"original_height\":1350,\"user\":{\"pk\":233992139,\"username\":\"itsik92\",\"full_name\":\"Itsik Kuzenogi\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/4c722f25ad9fc05c6afcb3d4136b511e/5B19E30F/t51.2885-19/s150x150/26398996_144356082937699_8514693984814104576_n.jpg\",\"profile_pic_id\":\"1692100417158607070_233992139\",\"is_verified\":false,\"has_anonymous_profile_picture\":false,\"media_count\":0,\"geo_media_count\":0,\"follower_count\":0,\"following_count\":0,\"biography\":null,\"external_url\":null,\"can_boost_post\":false,\"can_see_organic_insights\":false,\"show_insights_terms\":false,\"can_convert_to_business\":false,\"can_create_sponsor_tags\":false,\"can_be_tagged_as_sponsor\":false,\"reel_auto_archive\":null,\"is_profile_action_needed\":false,\"usertags_count\":0,\"usertag_review_enabled\":false,\"is_needy\":false,\"has_chaining\":false,\"hd_profile_pic_versions\":null,\"hd_profile_pic_url_info\":null,\"is_business\":false,\"show_business_conversion_icon\":false,\"show_conversion_edit_entry\":false,\"aggregate_promote_engagement\":false,\"allowed_commenter_type\":null,\"is_video_creator\":false,\"has_profile_video_feed\":false,\"has_highlight_reels\":false,\"include_direct_blacklist_status\":false,\"can_follow_hashtag\":false,\"besties_count\":0,\"show_besties_badge\":false,\"auto_expand_chaining\":false},\"caption\":{\"pk\":17905481266082220,\"user_id\":233992139,\"text\":\"שלישי פעמיים כי טוב 🤗\\nזה שלישי עם חופש !\\n#חופש #אשדוד  #ישראל #שלישי #טוב #שבוע #טוב #שבועטוב  #לייק #like #ashdod #israel #ашдод  #израиль  #лайк\",\"type\":1,\"created_at\":1517904675,\"created_at_utc\":1517904675,\"content_type\":\"comment\",\"status\":\"Active\",\"bit_flags\":0,\"user\":{\"pk\":233992139,\"username\":\"itsik92\",\"full_name\":\"Itsik Kuzenogi\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/4c722f25ad9fc05c6afcb3d4136b511e/5B19E30F/t51.2885-19/s150x150/26398996_144356082937699_8514693984814104576_n.jpg\",\"profile_pic_id\":\"1692100417158607070_233992139\",\"friendship_status\":{\"following\":false,\"outgoing_request\":false,\"is_bestie\":false},\"is_verified\":false,\"has_anonymous_profile_picture\":false,\"is_unpublished\":false,\"is_favorite\":false},\"did_report_as_spam\":false,\"media_id\":1708630710656856315,\"has_translation\":true},\"caption_is_edited\":false,\"like_count\":91,\"has_liked\":false,\"top_likers\":null,\"comment_likes_enabled\":false,\"comment_threading_enabled\":true,\"has_more_comments\":true,\"next_max_id\":17910001768111570,\"max_num_visible_preview_comments\":2,\"preview_comments\":[{\"pk\":17923315261044405,\"user_id\":233992139,\"text\":\"@roeekay שלוק גם נחשב 😂\",\"type\":2,\"created_at\":1517914993,\"created_at_utc\":1517914993,\"content_type\":\"comment\",\"status\":\"Active\",\"bit_flags\":0,\"user\":{\"pk\":233992139,\"username\":\"itsik92\",\"full_name\":\"Itsik Kuzenogi\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/4c722f25ad9fc05c6afcb3d4136b511e/5B19E30F/t51.2885-19/s150x150/26398996_144356082937699_8514693984814104576_n.jpg\",\"profile_pic_id\":\"1692100417158607070_233992139\",\"is_verified\":false},\"did_report_as_spam\":false,\"media_id\":1708630710656856315,\"has_translation\":true},{\"pk\":17910001768111570,\"user_id\":3167481285,\"text\":\"איזה נשרט\",\"type\":0,\"created_at\":1517984774,\"created_at_utc\":1517984774,\"content_type\":\"comment\",\"status\":\"Active\",\"bit_flags\":0,\"user\":{\"pk\":3167481285,\"username\":\"omrynidam2\",\"full_name\":\"omry nidam\",\"is_private\":true,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/062a7d33fe7b229af8ed73dba4a62ba0/5B0F6950/t51.2885-19/s150x150/22582186_181076035801182_3212074752118095872_n.jpg\",\"profile_pic_id\":\"1629938681551220097_3167481285\",\"is_verified\":false},\"did_report_as_spam\":false,\"media_id\":1708630710656856315,\"has_translation\":true}],\"comment_count\":7,\"photo_of_you\":false,\"can_viewer_save\":true,\"organic_tracking_token\":\"eyJ2ZXJzaW9uIjo1LCJwYXlsb2FkIjp7ImlzX2FuYWx5dGljc190cmFja2VkIjpmYWxzZSwidXVpZCI6ImUzYWNjMDNiODIzODQ2MTliZWRkYzhmMWFlNmE5ODZlMTcwODYzMDcxMDY1Njg1NjMxNSIsInNlcnZlcl90b2tlbiI6IjE1MTc5ODcyMDY2MDl8MTcwODYzMDcxMDY1Njg1NjMxNXwzMTk5NzQyOXwwOTIwYzk0MWMxNDhmYmUyMmFiMjlmOTc2ODQzNjBmZDQxOTg1MmE4NGEwYzNhYTJjNTIyMjVjMGVhNDY0NjdhIn0sInNpZ25hdHVyZSI6IiJ9\",\"preview\":null,\"likers\":null,\"usertags\":{\"in\":[{\"user\":{\"pk\":49188784,\"username\":\"castrofashion\",\"full_name\":\"CASTRO\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/3e6b74ab4eaead34ac64e56fc64fa18c/5B0DD376/t51.2885-19/11848944_827230584032805_1057437513_a.jpg\",\"is_verified\":true},\"position\":[0.8552246,0.9111111],\"start_time_in_video_in_sec\":null,\"duration_in_video_in_sec\":null},{\"user\":{\"pk\":242236354,\"username\":\"asics\",\"full_name\":\"ASICS America\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/f1ef21b4d95a162d8d345f797edb9826/5B16C436/t51.2885-19/s150x150/20478588_939622722843855_3593631451897135104_a.jpg\",\"profile_pic_id\":\"1571203001879583329_242236354\",\"is_verified\":true},\"position\":[0.8640747,0.92890626],\"start_time_in_video_in_sec\":null,\"duration_in_video_in_sec\":null},{\"user\":{\"pk\":1310042385,\"username\":\"mjmaniajeans\",\"full_name\":\"Mania Jeans\",\"is_private\":false,\"profile_pic_url\":\"https://instagram.fhfa2-1.fna.fbcdn.net/vp/9d685146523fa2b809439e8ff28ef622/5B23179D/t51.2885-19/s150x150/17662605_417394858605258_4917581152685916160_a.jpg\",\"profile_pic_id\":\"1481735901804843829_1310042385\",\"is_verified\":false},\"position\":[0.9305556,0.86032987],\"start_time_in_video_in_sec\":null,\"duration_in_video_in_sec\":null}]},\"injected\":null,\"collapse_comments\":null,\"dominant_color\":null,\"fb_page_url\":null,\"location\":{\"pk\":215021641.0,\"name\":\"Ashdod\",\"address\":\"\",\"city\":\"\",\"short_name\":\"Ashdod\",\"lng\":34.65,\"lat\":31.8,\"external_source\":\"facebook_places\",\"facebook_places_id\":105695102798184},\"lat\":31.8,\"lng\":34.65,\"suggested_invites\":null}")
+    //};
         private bool _isBusy;
         private bool _isBotActive;
         private int _totalLikes = 0;
-
+       
         public bool IsBusy
         {
             get => _isBusy;
@@ -34,7 +45,7 @@ namespace InstaBot.Objects
                 RaisePropertyChanged();
             }
         }
-
+        
 
         public bool IsBotActive
         {
@@ -46,8 +57,87 @@ namespace InstaBot.Objects
             }
         }
 
+        public ObservableCollection<Graphic> SelectedGraphics { get; set; } = new ObservableCollection<Graphic>();
+        public GraphicsOverlayCollection GetLikeGraphicsOverlayCollection
+        {
+            get {
+                if (MediaByTag == null)
+                    return new GraphicsOverlayCollection();
+
+                var graphicsOverlayCollection = new GraphicsOverlayCollection();
+
+                var tagGraphicsOverlay = new GraphicsOverlay();
+                var likedGraphicsOverlay = new GraphicsOverlay();
+
+                foreach (var item in UserFeedData)
+                {
+                    if (item?.lat != null && item?.lng != null  )
+                    {
+                        try
+                        {
+                            var g = new Graphic
+                            {
+                                Geometry = new MapPoint(item.lng.Value, item.lat.Value, SpatialReferences.Wgs84),
+                                Symbol = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Colors.Blue, 20)
+                            };
+
+                            g.Attributes.Add("profile_picture", item.user.profile_pic_url);
+                            g.Attributes.Add("picture", item.image_versions2.candidate.url);
+                            g.Attributes.Add("username", item.user.full_name);
+                            g.Attributes.Add("address", item.location.address);
+                            g.Attributes.Add("city", item.location.city);
+                            g.Attributes.Add("short_name", item.location.short_name);
+                            g.Attributes.Add("caption", Helpers.GenerateData.SpliceText(item.caption.text,50));
+                            g.Attributes.Add("ig_link", $"https://www.instagram.com/p/{item.code}");
+                            likedGraphicsOverlay.Graphics.Add(g);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+
+                foreach (var item in MediaByTag)
+                {
+                    if (item.lat != null && item.lng != null)
+                    {
+                        try
+                        {
+                            var g = new Graphic
+                            {
+                                Geometry = new MapPoint(item.lng.Value, item.lat.Value, SpatialReferences.Wgs84),
+                                Symbol = new PictureMarkerSymbol(new Uri(item.user.profile_pic_url))
+                                {
+                                    Width = 50,
+                                    Height = 50
+                                }
+                            };
+                            g.Attributes.Add("profile_picture", item.user.profile_pic_url);
+                            g.Attributes.Add("picture", item.image_versions2.candidate.url);
+                            g.Attributes.Add("username", item.user.full_name);
+                            g.Attributes.Add("address", item.location.address);
+                            g.Attributes.Add("city", item.location.city);
+                            g.Attributes.Add("short_name", item.location.short_name);
+                            g.Attributes.Add("caption", Helpers.GenerateData.SpliceText(item.caption.text, 50));
+                            g.Attributes.Add("ig_link", $"https://www.instagram.com/p/{item.code}");
+
+                            tagGraphicsOverlay.Graphics.Add(g);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+                graphicsOverlayCollection.Add(tagGraphicsOverlay);
+                graphicsOverlayCollection.Add(likedGraphicsOverlay);
+                return graphicsOverlayCollection;
+            }
+        }
+
         public int MediaByTagCount { get; set; } = 0;
-        public List<FeedItem> MediaByTag { get; set; }
+        public static List<FeedItem> MediaByTag { get; set; }
 
         public UserDetail LoggedInUser
         {
@@ -330,6 +420,7 @@ namespace InstaBot.Objects
                         default:
                             break;
                     }
+                    RaisePropertyChanged("GetLikeGraphicsOverlayCollection");
                     return true;
 
                 }
@@ -365,7 +456,7 @@ namespace InstaBot.Objects
 
                 GetIdFromLastReponse();
             }
-
+            RaisePropertyChanged("GetLikeGraphicsOverlayCollection");
             return false;
         }
 
@@ -478,6 +569,7 @@ namespace InstaBot.Objects
                         Console.WriteLine(e);
                     }
 
+                    RaisePropertyChanged("GetLikeGraphicsOverlayCollection");
                     MediaByTagCount = MediaByTag.Count;
 
                     //MediaByTag = feedData.items;
