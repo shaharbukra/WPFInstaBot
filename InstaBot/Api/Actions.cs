@@ -1,4 +1,9 @@
-﻿namespace InstaBot.Api
+﻿using InstaBot.Callbacks;
+using InstaBot.Helpers;
+using InstaBot.Objects;
+using InstaBot.Objects.InstagramData;
+
+namespace InstaBot.Api
 {
     using InstaBot.Callbacks;
     using InstaBot.Helpers;
@@ -293,7 +298,7 @@
             //if (await Request.SendRequestAsync("feed/timeline/", null, false))
             if (await Request.SendRequestAsync($"users/{userNameId}/info/", null, false))
                 {
-                var arg = JsonConvert.DeserializeObject<Objects.InstagramData.UserDetail>(InstaInfo.LastResponse);
+                var arg = JsonConvert.DeserializeObject<UserDetail>(InstaInfo.LastResponse);
                 if (arg != null)
                 {
                     CallBackMedia.CallbackEventHandler(arg, "profile");

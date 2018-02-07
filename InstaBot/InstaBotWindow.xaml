@@ -1,0 +1,617 @@
+﻿<Window
+    x:Class="InstaBot.InstaBotWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
+    xmlns:helpers="clr-namespace:InstaBot.Helpers"
+    xmlns:local="clr-namespace:InstaBot"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:virtualCollection="clr-namespace:VirtualCollection.VirtualCollection"
+    xmlns:vm="clr-namespace:InstaBot.Objects"
+    Title="InstaBot"
+    Background="{DynamicResource MaterialDesignPaper}"
+    FontFamily="{DynamicResource MaterialDesignFont}"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <vm:Bot x:Key="viewmodel" />
+    </Window.Resources>
+    <Grid x:Name="instaGrid" DataContext="{StaticResource viewmodel}">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+        <dragablz:TabablzControl Grid.Row="0">
+
+            <dragablz:TabablzControl.InterTabController>
+                <dragablz:InterTabController />
+            </dragablz:TabablzControl.InterTabController>
+            <TabItem Header="Main">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" MinHeight="200" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="2*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <!--  Login  -->
+                    <materialDesign:Flipper
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Style="{StaticResource MaterialDesignCardFlipper}">
+                        <materialDesign:Flipper.FrontContent>
+                            <GroupBox
+                                Margin="6"
+                                materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                BorderThickness="0"
+                                Style="{DynamicResource MaterialDesignCardGroupBox}">
+                                <GroupBox.HeaderTemplate>
+                                    <DataTemplate>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                                Text="Login Data" />
+                                            <Button
+                                                Width="192"
+                                                Margin="8"
+                                                Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                                Content="{Binding LoggedInUser.user.username, TargetNullValue=Need To Login, FallbackValue=Please Login}"
+                                                Style="{StaticResource MaterialDesignRaisedLightButton}" />
+
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GroupBox.HeaderTemplate>
+                                <StackPanel
+                                    HorizontalAlignment="Stretch"
+                                    Orientation="Vertical"
+                                    TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="auto" />
+                                        </Grid.RowDefinitions>
+                                        <materialDesign:PackIcon
+                                            Grid.Column="0"
+                                            Foreground="{Binding ElementName=NameTextBox, Path=BorderBrush}"
+                                            Kind="Account" />
+                                        <TextBox
+                                            Grid.Column="1"
+                                            Margin="4,0"
+                                            HorizontalAlignment="Stretch"
+                                            materialDesign:HintAssist.Hint="Login">
+                                            <TextBox.Text>
+                                                <Binding Path="Username" UpdateSourceTrigger="PropertyChanged" />
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </Grid>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="auto" />
+                                        </Grid.RowDefinitions>
+                                        <materialDesign:PackIcon
+                                            Grid.Column="0"
+                                            Foreground="{Binding ElementName=NameTextBox, Path=BorderBrush}"
+                                            Kind="Key" />
+                                        <PasswordBox
+                                            x:Name="PasswordBox"
+                                            Grid.Column="1"
+                                            Margin="4,0"
+                                            HorizontalAlignment="Stretch"
+                                            helpers:PasswordHelper.Attach="True"
+                                            helpers:PasswordHelper.Password="{Binding Password, Mode=TwoWay}"
+                                            materialDesign:HintAssist.Hint="Password" />
+
+                                    </Grid>
+
+
+                                    <StackPanel
+                                        Margin="0,8"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <Button
+                                            x:Name="LoginBtn"
+                                            Margin="4,0"
+                                            Click="Login_Click"
+                                            Content="Login"
+                                            Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                            ToolTip="Login" />
+                                        <Button
+                                            x:Name="BotButton"
+                                            Margin="4,0"
+                                            Click="Bot_Click"
+                                            Content="Start Bot"
+                                            IsEnabled="False"
+                                            Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                            ToolTip="Start Bot" />
+                                        <Button
+                                            x:Name="BotStopButton"
+                                            Margin="4,0"
+                                            Click="Bot_Click"
+                                            Content="Stop Bot"
+                                            Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                            ToolTip="Stop Bot"
+                                            Visibility="Collapsed" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                        </materialDesign:Flipper.FrontContent>
+                        <materialDesign:Flipper.BackContent>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <materialDesign:ColorZone Padding="6" Mode="Accent">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button
+                                            HorizontalAlignment="Left"
+                                            Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                            Style="{StaticResource MaterialDesignToolForegroundButton}">
+                                            <materialDesign:PackIcon HorizontalAlignment="Right" Kind="ArrowLeft" />
+                                        </Button>
+                                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center">User Detail</TextBlock>
+                                    </StackPanel>
+                                </materialDesign:ColorZone>
+                                <materialDesign:Card Grid.Row="1">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="140" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Image
+                                            Width="196"
+                                            Height="140"
+                                            Source="{Binding LoggedInUserImage}"
+                                            Stretch="Fill" />
+                                        <Button
+                                            Grid.Row="0"
+                                            Margin="0,0,16,-20"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            Click="OpenInstagramProfile"
+                                            Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}">
+                                            <materialDesign:PackIcon Kind="Instagram" />
+                                        </Button>
+                                        <StackPanel Grid.Row="1" Margin="8,24,8,0">
+                                            <TextBlock
+                                                Margin="2"
+                                                FontWeight="Bold"
+                                                Text="{Binding LoggedInUser.user.username}"
+                                                TextAlignment="Center" />
+                                            <TextBlock
+                                                Margin="2"
+                                                VerticalAlignment="Center"
+                                                Text="{Binding LoggedInUser.user.biography}"
+                                                TextAlignment="Center"
+                                                TextWrapping="Wrap" />
+                                            <TextBlock Margin="2" Text="{Binding LoggedInUser.user.following_count, StringFormat=Has following : \{0:0\}}" />
+                                            <TextBlock Margin="2" Text="{Binding LoggedInUser.user.follower_count, StringFormat=Has follower : \{0:0\}}" />
+                                            <TextBlock Margin="2" Text="{Binding LoggedInUser.user.media_count, StringFormat=With  \{0:0\} Pictures}" />
+                                        </StackPanel>
+
+                                    </Grid>
+                                </materialDesign:Card>
+                            </Grid>
+                        </materialDesign:Flipper.BackContent>
+                    </materialDesign:Flipper>
+                    <!--  Main Settings  -->
+                    <GroupBox
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Grid.Column="1"
+                        Margin="6"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                        BorderThickness="0"
+                        Header="Main Settings"
+                        Style="{DynamicResource MaterialDesignCardGroupBox}">
+
+                        <StackPanel
+                            HorizontalAlignment="Stretch"
+                            Orientation="Vertical"
+                            TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                            <Grid Width="200" HorizontalAlignment="Left">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    TextAlignment="Left">
+                                    Like per hour
+                                </TextBlock>
+                                <ComboBox
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    MinWidth="30"
+                                    Margin="16,0,16,12"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    materialDesign:HintAssist.Hint="(Max 100)"
+                                    ItemsSource="{Binding LongListTill200}"
+                                    SelectedIndex="100"
+                                    SelectedItem="{Binding SelectedLikePerHour}"
+                                    Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                                    <ComboBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ComboBox.ItemsPanel>
+                                </ComboBox>
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center">
+                                    Follow per hour
+                                </TextBlock>
+                                <ComboBox
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    MinWidth="30"
+                                    Margin="16,0,16,12"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    materialDesign:HintAssist.Hint="(Max 100)"
+                                    ItemsSource="{Binding LongListTill200}"
+                                    SelectedIndex="100"
+                                    SelectedItem="{Binding SelectedFollowPerHour}"
+                                    Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                                    <ComboBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ComboBox.ItemsPanel>
+                                </ComboBox>
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center">
+                                    Unfollow per hour
+                                </TextBlock>
+                                <ComboBox
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    MinWidth="30"
+                                    Margin="16,0,16,12"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    materialDesign:HintAssist.Hint="(Max 100)"
+                                    ItemsSource="{Binding LongListTill200}"
+                                    SelectedIndex="100"
+                                    SelectedItem="{Binding SelectedFollowPerHour}"
+                                    Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                                    <ComboBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ComboBox.ItemsPanel>
+                                </ComboBox>
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center">
+                                    Comment per hour
+                                </TextBlock>
+                                <ComboBox
+                                    Grid.Row="3"
+                                    Grid.Column="1"
+                                    MinWidth="30"
+                                    Margin="16,0,16,12"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    materialDesign:HintAssist.Hint="(Max 100)"
+                                    ItemsSource="{Binding LongListTill200}"
+                                    SelectedIndex="100"
+                                    SelectedItem="{Binding SelectedFollowPerHour}"
+                                    Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                                    <ComboBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ComboBox.ItemsPanel>
+                                </ComboBox>
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center">
+                                    Save Follow list
+                                </TextBlock>
+                                <ToggleButton
+                                    Grid.Row="4"
+                                    Grid.Column="1"
+                                    IsChecked="True"
+                                    Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                    ToolTip="MaterialDesignSwitchToggleButton" />
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                    <!--  Tags  -->
+                    <GroupBox
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Grid.Column="2"
+                        Margin="6"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                        BorderThickness="0"
+                        Header="Tags"
+                        Style="{DynamicResource MaterialDesignCardGroupBox}">
+
+                        <StackPanel
+                            Margin="8,24,16,24"
+                            HorizontalAlignment="Stretch"
+                            Orientation="Vertical"
+                            TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">Search by</TextBlock>
+                                <RadioButton
+                                    Margin="4,0"
+                                    IsChecked="{Binding TagSelected}"
+                                    Style="{StaticResource MaterialDesignRadioButton}">
+                                    Tags
+                                </RadioButton>
+                                <RadioButton
+                                    Margin="4,0"
+                                    IsChecked="{Binding GeoIdSelected}"
+                                    Style="{StaticResource MaterialDesignRadioButton}">
+                                    GeoId
+                                </RadioButton>
+                                <RadioButton
+                                    Margin="4,0"
+                                    IsChecked="{Binding GeoNameSelected}"
+                                    Style="{StaticResource MaterialDesignRadioButton}">
+                                    Geo Name
+                                </RadioButton>
+                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="4,0"
+                                    VerticalAlignment="Center"
+                                    TextAlignment="Left">
+                                    Tags
+                                </TextBlock>
+                                <TextBox
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    materialDesign:HintAssist.Hint="Tags list seperate by ','"
+                                    AcceptsReturn="True"
+                                    Text="{Binding TagsList, Mode=TwoWay}"
+                                    TextWrapping="Wrap"
+                                    VerticalScrollBarVisibility="Auto" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Margin="4,0"
+                                    VerticalAlignment="Center"
+                                    TextAlignment="Left">
+                                    Stop Words
+                                </TextBlock>
+                                <TextBox
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    materialDesign:HintAssist.Hint="Tags list seperate by ','"
+                                    AcceptsReturn="True"
+                                    SpellCheck.IsEnabled="True"
+                                    Text="{Binding StopWordList, Mode=TwoWay}"
+                                    TextWrapping="Wrap"
+                                    VerticalScrollBarVisibility="Auto" />
+
+
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                    <!--  Bot last interaction  -->
+                    <GroupBox
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Margin="6"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                        BorderThickness="0"
+                        Header="Last Interaction"
+                        Style="{DynamicResource MaterialDesignCardGroupBox}">
+
+                        <StackPanel
+                            HorizontalAlignment="Stretch"
+                            Orientation="Vertical"
+                            TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                            <Grid x:Name="LastFeedGrid" DataContext="{Binding LastFeedItem}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+
+                                </Grid.RowDefinitions>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock VerticalAlignment="Center" TextAlignment="Left">
+                                            User Name:
+                                        </TextBlock>
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding user.full_name}"
+                                            TextAlignment="Left" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock VerticalAlignment="Center" TextAlignment="Left">
+                                            Commnets:
+                                        </TextBlock>
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding comment_count}"
+                                            TextAlignment="Left" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock VerticalAlignment="Center" TextAlignment="Left">
+                                            Likes
+                                        </TextBlock>
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding like_count}"
+                                            TextAlignment="Left" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock VerticalAlignment="Center" TextAlignment="Left">
+                                            Caption:
+                                        </TextBlock>
+                                        <TextBlock
+                                            Width="auto"
+                                            Height="auto"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding caption.text}"
+                                            TextAlignment="Left" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <Image
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Height="{Binding ActualHeight, ElementName=LastFeedGrid}"
+                                    Source="{Binding image_versions2.candidate.url}"
+                                    Stretch="Uniform" />
+
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                    <!--  Log  -->
+                    <GroupBox
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Margin="6"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                        BorderThickness="0"
+                        Header="Log"
+                        Style="{DynamicResource MaterialDesignCardGroupBox}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <ScrollViewer x:Name="logScroll">
+                                <TextBlock
+                                    x:Name="logTxtBox"
+                                    MinWidth="100"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    materialDesign:HintAssist.Hint="Log"
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    TextWrapping="Wrap" />
+                            </ScrollViewer>
+                        </Grid>
+
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Bot History">
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">Material Design</TextBlock>
+            </TabItem>
+            <TabItem Header="Map">
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">Looks Quite Nice</TextBlock>
+            </TabItem>
+        </dragablz:TabablzControl>
+
+        <!--  Buttom StatusBar  -->
+        <StatusBar
+            Grid.Row="1"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch">
+            <StatusBarItem>
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="Not busy" />
+                            <Setter Property="Background" Value="AntiqueWhite" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                    <Setter Property="Text" Value="Requesting Data..." />
+                                    <Setter Property="Background" Value="Red" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StatusBarItem>
+            <Separator Opacity=".5" />
+            <StatusBarItem>
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="Bot not active" />
+                            <Setter Property="Background" Value="AntiqueWhite" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBotActive}" Value="True">
+                                    <Setter Property="Text" Value="Bot is active" />
+                                    <Setter Property="Background" Value="LawnGreen" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StatusBarItem>
+            <Separator Opacity=".5" />
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="5,0" Text="Liked" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[LikeCounter], StringFormat=\{0:D\}}" />
+                    <TextBlock Margin="5,0" Text="Next Like:" />
+                    <TextBlock Margin="5,0" Text="{Binding LikeTimer, StringFormat=\{0:D\}}" />
+
+                    <TextBlock Margin="5,0" Text="Commented" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[CommentCounter], StringFormat=\{0:D\}}" />
+
+                    <TextBlock Margin="5,0" Text="Followed" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[FollowCounter], StringFormat=\{0:D\}}" />
+
+                    <TextBlock Margin="5,0" Text="Unfollowed" />
+                    <TextBlock Margin="5,0" Text="{Binding NextIteration[UnfollowCounter], StringFormat=\{0:D\}}" />
+
+                </StackPanel>
+
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
