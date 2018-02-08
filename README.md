@@ -17,10 +17,11 @@ The End-User assumes sole responsibility for anything resulting from the use thi
 ----------
 
 ### Whats new?
-1. Like - Random like for each tag for random.
-2. History - Tab to see all the like/comments/follow history
-3. Map - You can see the places of the searched tag, identify and see more detail
-4. Material Design
+* Like - Random like for each tag for random.
+* Comment - Random comments for each tag for random.
+* History - Tab to see all the like/comments/follow history
+* Map - You can see the places of the searched tag, identify and see more detail
+* Material Design
 ----------
 
 ## Original Idea:
