@@ -51,7 +51,7 @@ namespace InstaBot
             if (TagMapView.GraphicsOverlays.Count > 0)
             {
                 var tolerance = 10d; // Use larger tolerance for touch
-                var maximumResults = 1; // Only return one graphic  
+                var maximumResults = 3; // Only return one graphic  
                 var onlyReturnPopups = false; // Return more than popups
 
                 var graphicColl = new List<Graphic>();
@@ -69,7 +69,7 @@ namespace InstaBot
                     if (identifyResults.Graphics.Count > 0)
                     {
                         IdentifyExpander.IsExpanded = true;
-                        InstaAutoBot.SelectedGraphics.Add(identifyResults.Graphics[0]);
+                        identifyResults.Graphics.ToList().ForEach(g=> InstaAutoBot.SelectedGraphics.Add(g));
                     }
                 }
 
@@ -173,7 +173,12 @@ namespace InstaBot
         private void OpenLink(object sender, MouseButtonEventArgs e)
         {
             var g = (sender as FrameworkElement)?.DataContext as Graphic;
-            System.Diagnostics.Process.Start(g.Attributes["ig_link"].ToString());
+            OpenUrl(g.Attributes["ig_link"].ToString());
+        }
+
+        private void OpenUrl(string url)
+        {
+            System.Diagnostics.Process.Start(url);
 
         }
     }

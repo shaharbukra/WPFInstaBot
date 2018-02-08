@@ -172,7 +172,6 @@ namespace InstaBot.Objects
             }
         }
 
-        public int LikeTimer => NextIteration["Like"] == 0 ? 0 : NextIteration["Like"] - DateNow;
 
         public List<int> LongListTill1000 => Enumerable.Range(0, 1000).ToList();
         public List<int> LongListTill200 => Enumerable.Range(0, 200).ToList();
@@ -181,8 +180,12 @@ namespace InstaBot.Objects
 
         public int SelectedMaxLikes { get; set; } = 300;
 
-        public int SelectedLikePerHour { get; set; } = 60;
+        public int SelectedLikePerHour { get; set; } = 0;
         public int SelectedLikeDelayPerHour => 3600 / SelectedLikePerHour;
+
+        public string LikeTimer => GetTime("Like");
+        
+
 
         public int SelectedFollowPerHour { get; set; } = 0;
         public int SelectedFollowDelayPerHour => 3600 / SelectedFollowPerHour;
@@ -191,8 +194,10 @@ namespace InstaBot.Objects
         public int SelectedUnfollowPerHour { get; set; } = 0;
         public int SelectedUnFollowDelayPerHour => 3600 / SelectedUnfollowPerHour;
 
-        public int SelectedCommentPerHour { get; set; } = 0;
+        public int SelectedCommentPerHour { get; set; } = 2;
         public int SelectedCommentDelayPerHour => 3600 / SelectedCommentPerHour;
+        public string CommentTimer => GetTime("Comment");
+
 
         public bool TagSelected
         {
@@ -390,13 +395,23 @@ namespace InstaBot.Objects
                 if (NextIteration["Like"] < DateNow && SelectedLikePerHour > 0)
                 {
                     NextIteration["Like"] = DateNow * 2;
-                    if (await AutoModHelper("like"))
+                    if (await AutoModHelper("Like"))
                         NextIteration["Like"] = DateNow + Convert.ToInt32(SelectedLikeDelayPerHour * 0.8 + SelectedLikeDelayPerHour * 0.2 * Random.NextDouble());
                     else
                         NextIteration["Like"] = DateNow;
                 }
 
+                if (NextIteration["Comment"] < DateNow && SelectedCommentPerHour > 0)
+                {
+                    NextIteration["Comment"] = DateNow * 2;
+                    if (await AutoModHelper("Comment"))
+                        NextIteration["Comment"] = DateNow + Convert.ToInt32(SelectedCommentDelayPerHour * 0.8 + SelectedCommentDelayPerHour * 0.2 * Random.NextDouble());
+                    else
+                        NextIteration["Comment"] = DateNow;
+                }
+
                 RaisePropertyChanged("LikeTimer");
+                RaisePropertyChanged("CommentTimer");
                 await Task.Delay(1000);
             }
 
@@ -405,16 +420,16 @@ namespace InstaBot.Objects
 
         public async Task<bool> AutoModHelper(string type)
         {
-            if (MediaByTagCount > 0 && InstaInfo.NumberOfLikePerTag > 0)
+            if (MediaByTagCount > 0 && InstaInfo.NumberOfActionsPerTag > 0)
             {
                 try
                 {
                     switch (type)
                     {
-                        case "like":
+                        case "Like":
                             await LikeTag();
                             break;
-                        case "comment":
+                        case "Comment":
                             await CommentTag();
                             break;
                         default:
@@ -435,10 +450,9 @@ namespace InstaBot.Objects
             {
                 var tags = TagsList.Split(',');
                 var selectedTag = tags[Random.Next(0, tags.Length)];
-                InstaInfo.NumberOfLikePerTag = Random.Next(5, 20);
+                InstaInfo.NumberOfActionsPerTag = Random.Next(10, 20);
 
-                Log.WriteLog($"Going to like {selectedTag} for {InstaInfo.NumberOfLikePerTag} times....");
-
+                Log.WriteLog($"Going to like {selectedTag} for {InstaInfo.NumberOfActionsPerTag} times....");
 
                 if (TagSelected)
                 {
@@ -472,11 +486,12 @@ namespace InstaBot.Objects
                 {
                     NextIteration["LikeCounter"]++;
                     UserFeedData.Add(tagToLike);
+
                     MediaByTag.Remove(tagToLike);
                     MediaByTagCount--;
-                    InstaInfo.NumberOfLikePerTag--;
+                    InstaInfo.NumberOfActionsPerTag--;
 
-                    if (InstaInfo.NumberOfLikePerTag == 0)
+                    if (InstaInfo.NumberOfActionsPerTag == 0)
                     {
                         MediaByTag.Clear();
                         MediaByTagCount = 0;
@@ -489,50 +504,83 @@ namespace InstaBot.Objects
 
                     return true;
                 }
-
-                Log.WriteLog($"Failed to like with url ", $"https://www.instagram.com/p/{tagToLike.code}");
-                MediaByTag.Remove(tagToLike);
-                MediaByTagCount--;
+                else
+                {
+                    Log.WriteLog($"Failed to like with url ", $"https://www.instagram.com/p/{tagToLike.code}");
+                    ChcekForError("Like");
+                }
             }
             else
             {
                 Log.WriteLog($"Too many likes -", $"https://www.instagram.com/p/{tagToLike.code}");
-            }
 
+                MediaByTag.Remove(tagToLike);
+                MediaByTagCount--;
+            }
             return false;
         }
 
         private async Task<bool> CommentTag()
         {
-            var tagToLike = MediaByTag[Random.Next(0, MediaByTag.Count)];
-            if (tagToLike.like_count > SelectedMinLikes && tagToLike.like_count < SelectedMaxLikes)
+            var tagToComment = MediaByTag[Random.Next(0, MediaByTag.Count)];
+            if (tagToComment.like_count > SelectedMinLikes && tagToComment.like_count < SelectedMaxLikes)
             {
+                var comment = GenerateData.Comment();
 
-                Log.WriteLog($"Try to like media_id {tagToLike.pk} ....");
+                Log.WriteLog($"Try to comment media_id {tagToComment.pk} with  \"{comment}\" ....");
 
-                if (await Actions.Like(tagToLike.pk))
+                if (await Actions.Comment(tagToComment.pk, comment))
                 {
-                    Log.WriteLog($"Success liking with url ", $"https://www.instagram.com/p/{tagToLike.code}");
-                    NextIteration["LikeCounter"]++;
-                    UserFeedData.Add(tagToLike);
-                    MediaByTag.Remove(tagToLike);
-                    MediaByTagCount--;
+                    NextIteration["CommentCounter"]++;
+                    UserFeedData.Add(tagToComment);
 
-                    if (UserFeedData.Count % InstaInfo.NumberOfLikePerTag == 0)
+                    MediaByTag.Remove(tagToComment);
+                    MediaByTagCount--;
+                    InstaInfo.NumberOfActionsPerTag--;
+
+                    if (UserFeedData.Count % InstaInfo.NumberOfActionsPerTag == 0)
                     {
                         MediaByTag.Clear();
                         MediaByTagCount = 0;
                     }
+                    Log.WriteLog($"Success commenting with url: ", $"https://www.instagram.com/p/{tagToComment.code}");
+
+                    RaisePropertyChanged("UserFeedData");
+                    RaisePropertyChanged("LastFeedItem");
 
                     return true;
                 }
-
-                Log.WriteLog($"Failed to like with url", $"https://www.instagram.com/p/{tagToLike.code}");
-                MediaByTag.Remove(tagToLike);
+                else
+                {
+                    Log.WriteLog($"Failed to comment with url: ", $"https://www.instagram.com/p/{tagToComment.code}");
+                    ChcekForError("Comment");
+                }
+            }
+            else
+            {
+                MediaByTag.Remove(tagToComment);
                 MediaByTagCount--;
             }
-
             return false;
+        }
+
+        private void ChcekForError(string action)
+        {
+            try
+            {
+                var errMsg = JsonConvert.DeserializeObject<ErrorMessage>(InstaInfo.LastResponse);
+                if (errMsg != null)
+                {
+                    if (errMsg.spam)
+                    {
+                        NextIteration[action] = DateNow + InstaInfo.BanSleepTime;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         private void GetIdFromLastReponse()
@@ -651,6 +699,21 @@ namespace InstaBot.Objects
             }
             IsBusy = false;
 
+        }
+
+        private string GetTime(string action)
+        {
+            if (NextIteration[action] == 0)
+                return "0";
+
+            var sec = NextIteration[action] == 0 ? 0 : NextIteration[action] - DateNow;
+            var t = TimeSpan.FromSeconds(sec);
+            if(t.Hours > 0)
+                return $"{t.Hours:D2}:{t.Minutes:D2}:{t.Seconds:D2}";
+            else if( t.Minutes > 0)
+                    return $"{t.Minutes:D2}:{t.Seconds:D2}";
+            else
+                return $"{t.Seconds:D2}";
         }
     }
 }

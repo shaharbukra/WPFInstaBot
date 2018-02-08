@@ -38,7 +38,7 @@ namespace InstaBot.Helpers
         {
             var comment = "";
             var random  = new Random(InstaInfo.DateNow);
-            if (CommentsList == null)
+            if (string.IsNullOrEmpty(CommentsList))
             {
                 LoadCommentsList();
             }

@@ -109,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\Bot.cs" />
+    <Compile Include="Objects\InstagramData\ErrorMessage.cs" />
     <Compile Include="Objects\InstagramData\FeedData.cs" />
     <Compile Include="Objects\InstagramData\FeedItemsData.cs" />
     <Compile Include="Objects\InstagramData\InboxData.cs" />

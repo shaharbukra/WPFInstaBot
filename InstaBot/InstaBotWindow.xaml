@@ -293,7 +293,7 @@
                                     materialDesign:HintAssist.Hint="(Max 100)"
                                     ItemsSource="{Binding LongListTill200}"
                                     SelectedIndex="100"
-                                    SelectedItem="{Binding SelectedFollowPerHour}"
+                                    SelectedItem="{Binding SelectedUnfollowPerHour}"
                                     Style="{StaticResource MaterialDesignFloatingHintComboBox}">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -317,7 +317,7 @@
                                     materialDesign:HintAssist.Hint="(Max 100)"
                                     ItemsSource="{Binding LongListTill200}"
                                     SelectedIndex="100"
-                                    SelectedItem="{Binding SelectedFollowPerHour}"
+                                    SelectedItem="{Binding SelectedCommentPerHour}"
                                     Style="{StaticResource MaterialDesignFloatingHintComboBox}">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -591,7 +591,6 @@
                         GraphicsOverlays="{Binding GetLikeGraphicsOverlayCollection}" />
                     <Expander
                         x:Name="IdentifyExpander"
-
                         Grid.Column="1"
                         ExpandDirection="Right"
                         IsExpanded="False">
@@ -608,50 +607,54 @@
                             TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
                             <ScrollViewer>
                                 <ListBox Margin="0,8,0,0" ItemsSource="{Binding SelectedGraphics}">
-
                                     <ListBox.ItemTemplate>
                                         <DataTemplate DataType="esri:Graphic">
-                                            <Grid MouseLeftButtonUp="OpenLink">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition MaxHeight="200" />
-                                                    <RowDefinition MaxHeight="200" />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                </Grid.RowDefinitions>
-                                                <Image
-                                                    Grid.Row="0"
-                                                    MaxHeight="200"
-                                                    Source="{Binding Attributes[profile_picture]}"
-                                                    Stretch="Uniform" />
-                                                <Image
-                                                    Grid.Row="1"
-                                                    MaxHeight="200"
-                                                    Source="{Binding Attributes[picture]}"
-                                                    Stretch="Uniform" />
-                                                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                                                    <TextBlock Text="User Name " />
-                                                    <TextBlock Text="{Binding Attributes[username]}" />
-                                                </StackPanel>
-                                                <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                                    <TextBlock Text="Address " />
-                                                    <TextBlock Text="{Binding Attributes[address]}" />
-                                                </StackPanel>
-                                                <StackPanel Grid.Row="4" Orientation="Horizontal">
-                                                    <TextBlock Text="City " />
-                                                    <TextBlock Text="{Binding Attributes[city]}" />
-                                                </StackPanel>
-                                                <StackPanel Grid.Row="5" Orientation="Horizontal">
-                                                    <TextBlock Text="Short Name " />
-                                                    <TextBlock Text="{Binding Attributes[short_name]}" />
-                                                </StackPanel>
-                                                <StackPanel Grid.Row="6" Orientation="Horizontal">
-                                                    <TextBlock Text="Caption " />
-                                                    <TextBlock Text="{Binding Attributes[caption]}" />
-                                                </StackPanel>
-                                            </Grid>
+                                            <Expander
+                                                HorizontalAlignment="Stretch"
+                                                Header="{Binding Attributes[username]}"
+                                                IsExpanded="False">
+                                                <Grid MouseLeftButtonUp="OpenLink">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition MaxHeight="200" />
+                                                        <RowDefinition MaxHeight="200" />
+                                                        <RowDefinition />
+                                                        <RowDefinition />
+                                                        <RowDefinition />
+                                                        <RowDefinition />
+                                                        <RowDefinition />
+                                                    </Grid.RowDefinitions>
+                                                    <Image
+                                                        Grid.Row="0"
+                                                        MaxHeight="200"
+                                                        Source="{Binding Attributes[profile_picture]}"
+                                                        Stretch="Uniform" />
+                                                    <Image
+                                                        Grid.Row="1"
+                                                        MaxHeight="200"
+                                                        Source="{Binding Attributes[picture]}"
+                                                        Stretch="Uniform" />
+                                                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                                        <TextBlock Text="User Name " />
+                                                        <TextBlock Text="{Binding Attributes[username]}" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                                        <TextBlock Text="Address " />
+                                                        <TextBlock Text="{Binding Attributes[address]}" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Row="4" Orientation="Horizontal">
+                                                        <TextBlock Text="City " />
+                                                        <TextBlock Text="{Binding Attributes[city]}" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Row="5" Orientation="Horizontal">
+                                                        <TextBlock Text="Short Name " />
+                                                        <TextBlock Text="{Binding Attributes[short_name]}" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Row="6" Orientation="Horizontal">
+                                                        <TextBlock Text="Caption " />
+                                                        <TextBlock Text="{Binding Attributes[caption]}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Expander>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -707,18 +710,25 @@
                     <TextBlock Margin="5,0" Text="{Binding NextIteration[LikeCounter], StringFormat=\{0:D\}}" />
                     <TextBlock Margin="5,0" Text="Next Like:" />
                     <TextBlock Margin="5,0" Text="{Binding LikeTimer, StringFormat=\{0:D\}}" />
-
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Opacity=".5" />
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="5,0" Text="Commented" />
                     <TextBlock Margin="5,0" Text="{Binding NextIteration[CommentCounter], StringFormat=\{0:D\}}" />
-
+                    <TextBlock Margin="5,0" Text="Next Comment:" />
+                    <TextBlock Margin="5,0" Text="{Binding CommentTimer, StringFormat=\{0:D\}}" />
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Opacity=".5" />
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="5,0" Text="Followed" />
                     <TextBlock Margin="5,0" Text="{Binding NextIteration[FollowCounter], StringFormat=\{0:D\}}" />
-
                     <TextBlock Margin="5,0" Text="Unfollowed" />
                     <TextBlock Margin="5,0" Text="{Binding NextIteration[UnfollowCounter], StringFormat=\{0:D\}}" />
-
                 </StackPanel>
-
             </StatusBarItem>
         </StatusBar>
     </Grid>

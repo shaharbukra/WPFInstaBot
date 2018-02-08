@@ -243,7 +243,27 @@ namespace InstaBot.Api
                     {"media_id",mediaId}
                 };
             var data = JsonConvert.SerializeObject(likeData).ToString();
-            if (await Request.SendRequestAsync("media/" + mediaId + "/like/", GenerateData.Signature(data), false))
+            if (await Request.SendRequestAsync($"media/{mediaId}/like/", GenerateData.Signature(data), false))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static async Task<bool> Comment(string mediaId,string comment)
+        {
+            var likeData = new Dictionary<string, string>
+            {
+                {"idempotence_token",GenerateData.UUID(true)},
+                {"_uuid",InstaInfo.Uuid},
+                {"_uid",InstaInfo.UserNameId},
+                {"_csrftoken",InstaInfo.CsrfToken},
+                {"comment_text",comment},
+                {"radio_type","wifi-none"},
+
+            };
+            var data = JsonConvert.SerializeObject(likeData).ToString();
+            if (await Request.SendRequestAsync($"media/{mediaId}/comment/", GenerateData.Signature(data), false))
             {
                 return true;
             }
@@ -482,5 +502,6 @@ namespace InstaBot.Api
             return false;
         }
 
+  
     }
 }
