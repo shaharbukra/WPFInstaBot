@@ -45,8 +45,6 @@ namespace InstaBot.Objects
                 RaisePropertyChanged();
             }
         }
-        
-
         public bool IsBotActive
         {
             get => _isBotActive;
@@ -56,6 +54,8 @@ namespace InstaBot.Objects
                 RaisePropertyChanged();
             }
         }
+        public bool IsSaveFollowList { get; set; } = true;
+        public ObservableDictionary<string,int> FollowList { get; set; } = new ObservableDictionary<string, int>();
 
         public ObservableCollection<Graphic> SelectedGraphics { get; set; } = new ObservableCollection<Graphic>();
         public GraphicsOverlayCollection GetLikeGraphicsOverlayCollection
@@ -373,8 +373,10 @@ namespace InstaBot.Objects
 
             if (loginUserDetail != null)
             {
+                await GetSelfFollowing();
                 LoggedInUser = loginUserDetail;
                 IsBusy = false;
+
                 return true;
             }
             else
@@ -385,6 +387,26 @@ namespace InstaBot.Objects
             }
         }
 
+        public async Task GetSelfFollowing()
+        {
+            FollowDeatil following;
+            try
+            {
+                var followListFromFile = File.ReadAllText(Environment.CurrentDirectory + $@"\data\{InstaInfo.Login}-self-following.dat");
+                if (!string.IsNullOrEmpty(followListFromFile))
+                {
+                    following = JsonConvert.DeserializeObject<FollowDeatil>(followListFromFile);
+                }
+            }
+            catch (Exception e)
+            {
+                following = await Actions.GetUserFollowing(InstaInfo.UserNameId);
+                var save_data = JsonConvert.SerializeObject(following).ToString();
+                new FileInfo(Environment.CurrentDirectory + "\\data\\").Directory.Create();
+                File.WriteAllText(Environment.CurrentDirectory + $@"\data\{InstaInfo.Login}-self-following.dat",
+                    save_data);
+            }
+        }
         public async Task StartBot()
         {
             IsBotActive = true;
@@ -714,6 +736,52 @@ namespace InstaBot.Objects
                     return $"{t.Minutes:D2}:{t.Seconds:D2}";
             else
                 return $"{t.Seconds:D2}";
+        }
+
+        private void SaveFollowList(string followUser, bool add)
+        {
+            if (IsSaveFollowList)
+            {
+                try
+                {
+                    if (add)
+                        FollowList.Add(followUser, DateNow);
+                    else
+                        FollowList.Remove(followUser);
+
+                    var save_data = JsonConvert.SerializeObject(FollowList).ToString();
+                    new FileInfo(Environment.CurrentDirectory + "\\data\\").Directory.Create();
+                    File.WriteAllText(Environment.CurrentDirectory + $@"\data\{InstaInfo.Login}-bot-follow-list.dat", save_data);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            else
+            {
+                LoadFollowList();
+            }
+        }
+
+        private void LoadFollowList()
+        {
+            if (IsSaveFollowList)
+            {
+                try
+                {
+                    var followListFromFile = File.ReadAllText(Environment.CurrentDirectory + $@"\data\{InstaInfo.Login}-bot-follow-list.dat");
+                    if (string.IsNullOrEmpty(followListFromFile))
+                    {
+                        FollowList = JsonConvert.DeserializeObject<ObservableDictionary<string, int>>(followListFromFile);
+                    }
+                }
+                catch 
+                {
+                    new FileInfo(Environment.CurrentDirectory + "\\data\\").Directory.Create();
+                    File.WriteAllText(Environment.CurrentDirectory + $@"\data\{InstaInfo.Login}-bot-follow-list.dat", string.Empty);
+                }
+            }
         }
     }
 }

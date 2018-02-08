@@ -71,4 +71,25 @@ namespace InstaBot.Objects.InstagramData
         public User user { get; set; }
         public string status { get; set; }
     }
+    public class MiniUser
+    {
+        public object pk { get; set; }
+        public string username { get; set; }
+        public string full_name { get; set; }
+        public bool is_private { get; set; }
+        public string profile_pic_url { get; set; }
+        public bool is_verified { get; set; }
+        public bool has_anonymous_profile_picture { get; set; }
+        public string reel_auto_archive { get; set; }
+        public bool is_favorite { get; set; }
+        public string profile_pic_id { get; set; }
+    }
+
+    public class FollowDeatil
+    {
+        public List<MiniUser> users { get; set; }
+        public bool big_list { get; set; }
+        public int page_size { get; set; }
+        public string status { get; set; }
+    }
 }

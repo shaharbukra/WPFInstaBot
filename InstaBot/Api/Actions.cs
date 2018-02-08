@@ -92,16 +92,6 @@ namespace InstaBot.Api
             return null;
         }
 
-        private static async Task<bool> GetRecentActivityAsync()
-        {
-            if (await Request.SendRequestAsync("news/inbox/?", null, false))
-            {
-                return true;
-            }
-            return false;
-        }
-
-
         /// <summary>
         /// The Login
         /// </summary>
@@ -306,7 +296,30 @@ namespace InstaBot.Api
             };
 
             var data = JsonConvert.SerializeObject(followData).ToString();
-            if (await Request.SendRequestAsync("friendships/create/" + userId + "/", GenerateData.Signature(data), false))
+            if (await Request.SendRequestAsync($"friendships/create/{userId}/", GenerateData.Signature(data), false))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// The Unfollow
+        /// </summary>
+        /// <param name="userId">The <see cref="string"/></param>
+        /// <returns>The <see cref="Task{bool}"/></returns>
+        public async Task<bool> Unfollow(string userId)
+        {
+            var followData = new Dictionary<string, string>
+            {
+                {"_uuid",InstaInfo.Uuid},
+                {"_uid",InstaInfo.UserNameId},
+                {"user_id",userId},
+                {"_csrftoken",InstaInfo.CsrfToken}
+            };
+
+            var data = JsonConvert.SerializeObject(followData).ToString();
+            if (await Request.SendRequestAsync($"friendships/destroy/{userId}/", GenerateData.Signature(data), false))
             {
                 return true;
             }
@@ -327,6 +340,16 @@ namespace InstaBot.Api
 
             }
             return false;
+        }
+
+        public static async Task<FollowDeatil> GetUserFollowing(string userId)
+        {
+            if (await Request.SendRequestAsync("friendships/" + userId + "/following/?rank_token='" + InstaInfo.RankToken, null, false))
+            {
+                var followingList = JsonConvert.DeserializeObject<FollowDeatil>(InstaInfo.LastResponse);
+                return followingList;
+            }
+            return null;
         }
 
         public static async Task<bool> GetProfileNotice()
@@ -483,7 +506,14 @@ namespace InstaBot.Api
             }
             return null;
         }
-
+        private static async Task<bool> GetRecentActivityAsync()
+        {
+            if (await Request.SendRequestAsync("news/inbox/?", null, false))
+            {
+                return true;
+            }
+            return false;
+        }
         private static async Task<bool> GetV2InboxAsync()
         {
             if (await Request.SendRequestAsync("direct_v2/inbox/?", null, false))

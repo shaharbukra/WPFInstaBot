@@ -334,7 +334,7 @@
                                 <ToggleButton
                                     Grid.Row="4"
                                     Grid.Column="1"
-                                    IsChecked="True"
+                                    IsChecked="{Binding IsSaveFollowList}"
                                     Style="{StaticResource MaterialDesignSwitchToggleButton}"
                                     ToolTip="MaterialDesignSwitchToggleButton" />
                             </Grid>

@@ -1,5 +1,6 @@
 ﻿using InstaBot.Objects;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -33,7 +34,7 @@ namespace InstaBot.Helpers
             return "ig_sig_key_version=" + InstaInfo.SigKeyVersion + "&signed_body=" + hash + "." + WebUtility.UrlEncode(data);
         }
 
-
+      
         internal static string Comment()
         {
             var comment = "";
