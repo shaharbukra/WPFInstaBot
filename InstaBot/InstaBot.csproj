@@ -75,10 +75,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="Api\Actions.cs" />
     <Compile Include="Api\Direct.cs" />
     <Compile Include="Api\Inbox.cs" />
@@ -101,10 +97,6 @@
     <Compile Include="Helpers\VirtualizingWrapPanel.cs" />
     <Compile Include="InstaBotWindow.xaml.cs">
       <DependentUpon>InstaBotWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
